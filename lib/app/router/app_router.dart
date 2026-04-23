@@ -4,11 +4,18 @@ import 'package:fuelkeeper/features/favorites/presentation/pages/favorites_page.
 import 'package:fuelkeeper/features/home/presentation/pages/home_page.dart';
 import 'package:fuelkeeper/features/logs/presentation/pages/logs_page.dart';
 import 'package:fuelkeeper/features/map/presentation/pages/map_page.dart';
+import 'package:fuelkeeper/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:fuelkeeper/features/onboarding/presentation/pages/permission_page.dart';
 import 'package:fuelkeeper/features/shell/presentation/main_shell.dart';
+import 'package:fuelkeeper/features/splash/presentation/pages/splash_page.dart';
 import 'package:fuelkeeper/features/stats/presentation/pages/stats_page.dart';
 
 class AppRoutes {
   AppRoutes._();
+
+  static const splash = '/splash';
+  static const onboarding = '/onboarding';
+  static const permission = '/permission';
 
   static const home = '/home';
   static const map = '/map';
@@ -18,8 +25,23 @@ class AppRoutes {
 }
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: AppRoutes.home,
+  initialLocation: AppRoutes.splash,
   routes: [
+    GoRoute(
+      path: AppRoutes.splash,
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: SplashPage()),
+    ),
+    GoRoute(
+      path: AppRoutes.onboarding,
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: OnboardingPage()),
+    ),
+    GoRoute(
+      path: AppRoutes.permission,
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: PermissionPage()),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainShell(navigationShell: navigationShell);
