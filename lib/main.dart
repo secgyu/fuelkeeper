@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_theme.dart';
-import 'package:fuelkeeper/features/home/presentation/pages/home_page.dart';
 
 void main() {
   runApp(const ProviderScope(child: FuelKeeperApp()));
@@ -12,11 +12,11 @@ class FuelKeeperApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'FuelKeeper',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: const HomePage(),
+      routerConfig: appRouter,
     );
   }
 }
