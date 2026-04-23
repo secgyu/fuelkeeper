@@ -3,6 +3,7 @@ import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/features/favorites/presentation/widgets/favorite_button.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/price_text.dart';
@@ -58,6 +59,8 @@ class TopStationCard extends StatelessWidget {
                             '${station.distanceKm.toStringAsFixed(1)}km',
                             style: AppTypography.caption,
                           ),
+                          const SizedBox(width: AppSpacing.xs),
+                          FavoriteButton(stationId: station.id),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.sm),

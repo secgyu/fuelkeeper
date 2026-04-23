@@ -4,6 +4,7 @@ import 'package:fuelkeeper/features/favorites/presentation/pages/favorites_page.
 import 'package:fuelkeeper/features/home/presentation/pages/home_page.dart';
 import 'package:fuelkeeper/features/logs/presentation/pages/logs_page.dart';
 import 'package:fuelkeeper/features/map/presentation/pages/map_page.dart';
+import 'package:fuelkeeper/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:fuelkeeper/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:fuelkeeper/features/onboarding/presentation/pages/permission_page.dart';
 import 'package:fuelkeeper/features/shell/presentation/main_shell.dart';
@@ -22,6 +23,8 @@ class AppRoutes {
   static const favorites = '/favorites';
   static const logs = '/logs';
   static const stats = '/stats';
+
+  static const notifications = '/notifications';
 }
 
 final GoRouter appRouter = GoRouter(
@@ -41,6 +44,10 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.permission,
       pageBuilder: (context, state) =>
           const NoTransitionPage(child: PermissionPage()),
+    ),
+    GoRoute(
+      path: AppRoutes.notifications,
+      builder: (context, state) => const NotificationsPage(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
