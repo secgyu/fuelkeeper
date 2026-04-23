@@ -9,6 +9,7 @@ import 'package:fuelkeeper/features/onboarding/presentation/pages/onboarding_pag
 import 'package:fuelkeeper/features/onboarding/presentation/pages/permission_page.dart';
 import 'package:fuelkeeper/features/shell/presentation/main_shell.dart';
 import 'package:fuelkeeper/features/splash/presentation/pages/splash_page.dart';
+import 'package:fuelkeeper/features/station_detail/presentation/pages/station_detail_page.dart';
 import 'package:fuelkeeper/features/stats/presentation/pages/stats_page.dart';
 
 class AppRoutes {
@@ -25,6 +26,9 @@ class AppRoutes {
   static const stats = '/stats';
 
   static const notifications = '/notifications';
+  static const station = '/station';
+
+  static String stationDetail(String id) => '$station/$id';
 }
 
 final GoRouter appRouter = GoRouter(
@@ -48,6 +52,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.notifications,
       builder: (context, state) => const NotificationsPage(),
+    ),
+    GoRoute(
+      path: '${AppRoutes.station}/:id',
+      builder: (context, state) =>
+          StationDetailPage(stationId: state.pathParameters['id']!),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

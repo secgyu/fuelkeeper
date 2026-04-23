@@ -34,6 +34,14 @@ final stationsProvider = FutureProvider<List<Station>>((ref) async {
   return repo.fetchNearby();
 });
 
+final stationByIdProvider = FutureProvider.family<Station?, String>((
+  ref,
+  id,
+) async {
+  final repo = ref.watch(stationRepositoryProvider);
+  return repo.fetchById(id);
+});
+
 final filteredStationsProvider = Provider<AsyncValue<List<Station>>>((ref) {
   final asyncStations = ref.watch(stationsProvider);
   final fuelType = ref.watch(selectedFuelTypeProvider);

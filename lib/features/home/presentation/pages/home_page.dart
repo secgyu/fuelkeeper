@@ -146,6 +146,7 @@ class _StationListView extends StatelessWidget {
             station: top,
             fuelType: fuelType,
             referencePrice: referencePrice,
+            onTap: () => context.push(AppRoutes.stationDetail(top.id)),
           );
         }
         final station = rest[i - 4];
@@ -154,7 +155,7 @@ class _StationListView extends StatelessWidget {
           station: station,
           fuelType: fuelType,
           lowestPrice: lowest,
-          onTap: () {},
+          onTap: () => context.push(AppRoutes.stationDetail(station.id)),
         );
       },
     );

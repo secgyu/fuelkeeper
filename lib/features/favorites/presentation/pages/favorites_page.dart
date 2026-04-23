@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 import 'package:fuelkeeper/features/favorites/application/favorites_providers.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/station_list_tile.dart';
+import 'package:go_router/go_router.dart';
 
 class FavoritesPage extends ConsumerWidget {
   const FavoritesPage({super.key});
@@ -52,7 +54,9 @@ class FavoritesPage extends ConsumerWidget {
                     station: favStations[i],
                     fuelType: fuelType,
                     lowestPrice: lowest,
-                    onTap: () {},
+                    onTap: () => context.push(
+                      AppRoutes.stationDetail(favStations[i].id),
+                    ),
                   ),
                 );
               },
