@@ -1,12 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/features/home/data/mock_station_repository.dart';
+import 'package:fuelkeeper/features/home/data/opinet_station_repository.dart';
 import 'package:fuelkeeper/features/home/data/station_repository.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/sort_order.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 
-final stationRepositoryProvider = Provider<StationRepository>(
-  (ref) => StationRepository(),
-);
+const bool _useMock = bool.fromEnvironment('USE_MOCK', defaultValue: true);
+
+final stationRepositoryProvider = Provider<StationRepository>((ref) {
+  return _useMock ? MockStationRepository() : OpinetStationRepository();
+});
 
 class SelectedFuelType extends Notifier<FuelType> {
   @override
