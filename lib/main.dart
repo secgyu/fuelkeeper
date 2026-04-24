@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/app/config/naver_map_config.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_theme.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_adapter.dart';
@@ -9,6 +11,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Hive.initFlutter();
   if (!Hive.isAdapterRegistered(1)) {
     Hive.registerAdapter(FuelLogAdapter());
@@ -19,6 +22,13 @@ Future<void> main() async {
     await Hive.deleteBoxFromDisk(HiveFuelLogRepository.boxName);
     await Hive.openBox<FuelLog>(HiveFuelLogRepository.boxName);
   }
+
+  await FlutterNaverMap().init(
+    clientId: NaverMapConfig.clientId,
+    onAuthFailed: (e) {
+      debugPrint('NaverMap auth failed: $e');
+    },
+  );
 
   runApp(const ProviderScope(child: FuelKeeperApp()));
 }
