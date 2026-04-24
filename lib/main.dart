@@ -13,7 +13,12 @@ Future<void> main() async {
   if (!Hive.isAdapterRegistered(1)) {
     Hive.registerAdapter(FuelLogAdapter());
   }
-  await Hive.openBox<FuelLog>(HiveFuelLogRepository.boxName);
+  try {
+    await Hive.openBox<FuelLog>(HiveFuelLogRepository.boxName);
+  } catch (_) {
+    await Hive.deleteBoxFromDisk(HiveFuelLogRepository.boxName);
+    await Hive.openBox<FuelLog>(HiveFuelLogRepository.boxName);
+  }
 
   runApp(const ProviderScope(child: FuelKeeperApp()));
 }
