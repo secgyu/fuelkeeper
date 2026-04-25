@@ -6,6 +6,7 @@ import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
@@ -22,12 +23,18 @@ class _MapPageState extends ConsumerState<MapPage> {
   NaverMapController? _controller;
   Station? _selected;
 
-  static const _initialTarget = NLatLng(37.5009, 127.0364);
+  static const _fallbackTarget = NLatLng(37.4979, 127.0276);
 
   @override
   Widget build(BuildContext context) {
     final stationsAsync = ref.watch(stationsProvider);
     final fuelType = ref.watch(selectedFuelTypeProvider);
+    final locationAsync = ref.watch(currentLocationProvider);
+
+    final initialTarget = locationAsync.maybeWhen(
+      data: (loc) => NLatLng(loc.latitude, loc.longitude),
+      orElse: () => _fallbackTarget,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.bgPrimary,
@@ -38,25 +45,30 @@ class _MapPageState extends ConsumerState<MapPage> {
           return Stack(
             children: [
               NaverMap(
-                options: const NaverMapViewOptions(
+                options: NaverMapViewOptions(
                   initialCameraPosition: NCameraPosition(
-                    target: _initialTarget,
+                    target: initialTarget,
                     zoom: 14,
                   ),
                   mapType: NMapType.basic,
-                  activeLayerGroups: [NLayerGroup.building],
+                  activeLayerGroups: const [NLayerGroup.building],
                   locationButtonEnable: false,
                   rotationGesturesEnable: false,
                   tiltGesturesEnable: false,
                   logoAlign: NLogoAlign.leftBottom,
-                  logoMargin: EdgeInsets.only(left: 12, bottom: 24),
+                  logoMargin: const EdgeInsets.only(left: 12, bottom: 24),
                 ),
                 onMapReady: (controller) async {
                   _controller = controller;
                   await _addMarkers(controller, stations, fuelType);
                 },
               ),
-              SafeArea(child: _TopBar(fuelType: fuelType)),
+              SafeArea(
+                child: _TopBar(
+                  fuelType: fuelType,
+                  onTap: () => _showFuelSheet(context, fuelType),
+                ),
+              ),
               if (_selected != null)
                 Positioned(
                   left: 0,
@@ -79,7 +91,7 @@ class _MapPageState extends ConsumerState<MapPage> {
                 child: _MyLocationButton(
                   onPressed: () => _controller?.updateCamera(
                     NCameraUpdate.scrollAndZoomTo(
-                      target: _initialTarget,
+                      target: initialTarget,
                       zoom: 14,
                     ),
                   ),
@@ -89,6 +101,71 @@ class _MapPageState extends ConsumerState<MapPage> {
           );
         },
       ),
+    );
+  }
+
+  Future<void> _showFuelSheet(BuildContext context, FuelType current) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.bgSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '연료 선택',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ),
+                ),
+                ...FuelType.values.map((fuel) {
+                  final isSelected = fuel == current;
+                  return ListTile(
+                    title: Text(
+                      fuel.label,
+                      style: TextStyle(
+                        fontWeight:
+                            isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? const Icon(
+                            Icons.check_rounded,
+                            color: AppColors.textPrimary,
+                          )
+                        : null,
+                    onTap: () {
+                      ref.read(selectedFuelTypeProvider.notifier).set(fuel);
+                      Navigator.of(sheetContext).pop();
+                    },
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -128,8 +205,9 @@ class _MapPageState extends ConsumerState<MapPage> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.fuelType});
+  const _TopBar({required this.fuelType, required this.onTap});
   final FuelType fuelType;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -142,40 +220,45 @@ class _TopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 10,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.bgSurface,
+          Material(
+            color: AppColors.bgSurface,
+            borderRadius: BorderRadius.circular(999),
+            elevation: 2,
+            shadowColor: Colors.black.withValues(alpha: 0.06),
+            child: InkWell(
               borderRadius: BorderRadius.circular(999),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.local_gas_station_rounded,
-                  size: 16,
-                  color: AppColors.textSecondary,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.local_gas_station_rounded,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      fuelType.label,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 18,
+                      color: AppColors.textTertiary,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  fuelType.label,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],

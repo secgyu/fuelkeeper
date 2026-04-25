@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/features/home/data/mock_station_repository.dart';
 import 'package:fuelkeeper/features/home/data/opinet_station_repository.dart';
 import 'package:fuelkeeper/features/home/data/station_repository.dart';
@@ -35,7 +36,13 @@ final selectedSortOrderProvider =
 
 final stationsProvider = FutureProvider<List<Station>>((ref) async {
   final repo = ref.watch(stationRepositoryProvider);
-  return repo.fetchNearby();
+  final fuelType = ref.watch(selectedFuelTypeProvider);
+  final location = await ref.watch(currentLocationProvider.future);
+  return repo.fetchNearby(
+    fuelType: fuelType,
+    latitude: location.latitude,
+    longitude: location.longitude,
+  );
 });
 
 final stationByIdProvider = FutureProvider.family<Station?, String>((

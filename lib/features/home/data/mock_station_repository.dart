@@ -7,11 +7,12 @@ import 'package:fuelkeeper/features/home/domain/station_brand.dart';
 class MockStationRepository implements StationRepository {
   @override
   Future<List<Station>> fetchNearby({
+    required FuelType fuelType,
     double? latitude,
     double? longitude,
   }) async {
     await Future.delayed(const Duration(milliseconds: 200));
-    return _mock;
+    return _mock.where((s) => s.priceOf(fuelType) != null).toList();
   }
 
   @override

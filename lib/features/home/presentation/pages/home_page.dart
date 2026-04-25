@@ -74,7 +74,24 @@ class HomePage extends ConsumerWidget {
             loading: () => const _LoadingState(),
             error: (e, _) => _ErrorState(message: e.toString()),
             data: (stations) {
-              if (stations.isEmpty) return const _EmptyState();
+              if (stations.isEmpty) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.base,
+                    AppSpacing.sm,
+                    AppSpacing.base,
+                    AppSpacing.xxl,
+                  ),
+                  children: const [
+                    PriceBanner(),
+                    SizedBox(height: AppSpacing.base),
+                    FuelTypeFilterRow(),
+                    SizedBox(height: AppSpacing.xxl),
+                    _EmptyState(),
+                  ],
+                );
+              }
               return _StationListView(
                 stations: stations,
                 fuelType: fuelType,

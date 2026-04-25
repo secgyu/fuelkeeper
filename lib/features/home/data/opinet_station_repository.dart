@@ -20,13 +20,14 @@ class OpinetStationRepository implements StationRepository {
 
   @override
   Future<List<Station>> fetchNearby({
+    required FuelType fuelType,
     double? latitude,
     double? longitude,
   }) async {
     final lat = latitude ?? _gangnamStation.latitude;
     final lng = longitude ?? _gangnamStation.longitude;
     final cacheKey =
-        '${lat.toStringAsFixed(3)}:${lng.toStringAsFixed(3)}:$_radiusMeters';
+        '${lat.toStringAsFixed(3)}:${lng.toStringAsFixed(3)}:$_radiusMeters:${fuelType.name}';
 
     final cached = _nearbyCache[cacheKey];
     if (cached != null && !cached.isExpired) return cached.value;
@@ -36,14 +37,14 @@ class OpinetStationRepository implements StationRepository {
       katecX: katec.x,
       katecY: katec.y,
       radius: _radiusMeters,
-      prodcd: OpinetCodes.prodcdOf(FuelType.gasoline),
+      prodcd: OpinetCodes.prodcdOf(fuelType),
       sort: 1,
     );
 
     final stations = <Station>[];
     for (final raw in list) {
       if (raw is! Map) continue;
-      final station = _mapNearby(raw.cast<String, dynamic>());
+      final station = _mapNearby(raw.cast<String, dynamic>(), fuelType);
       if (station != null) stations.add(station);
     }
 
@@ -64,7 +65,7 @@ class OpinetStationRepository implements StationRepository {
     return detail;
   }
 
-  Station? _mapNearby(Map<String, dynamic> json) {
+  Station? _mapNearby(Map<String, dynamic> json, FuelType fuelType) {
     final id = json['UNI_ID'] as String?;
     final name = json['OS_NM'] as String?;
     if (id == null || name == null) return null;
@@ -90,7 +91,7 @@ class OpinetStationRepository implements StationRepository {
       distanceKm: distance / 1000.0,
       latitude: position.latitude,
       longitude: position.longitude,
-      prices: price == null ? const {} : {FuelType.gasoline: price},
+      prices: price == null ? const {} : {fuelType: price},
     );
   }
 
