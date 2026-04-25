@@ -4,6 +4,7 @@ import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/fuel_type_filter_row.dart';
@@ -11,8 +12,6 @@ import 'package:fuelkeeper/features/home/presentation/widgets/price_banner.dart'
 import 'package:fuelkeeper/features/home/presentation/widgets/sort_filter_row.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/station_list_tile.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/top_station_card.dart';
-import 'package:fuelkeeper/features/location/application/location_providers.dart';
-import 'package:fuelkeeper/features/location/presentation/widgets/region_picker_sheet.dart';
 import 'package:go_router/go_router.dart';
 
 class HomePage extends ConsumerWidget {
@@ -23,13 +22,19 @@ class HomePage extends ConsumerWidget {
     final asyncStations = ref.watch(filteredStationsProvider);
     final fuelType = ref.watch(selectedFuelTypeProvider);
     final national = ref.watch(nationalAverageProvider);
-    final region = ref.watch(selectedRegionProvider);
+    final asyncAddress = ref.watch(currentAddressProvider);
+
+    Future<void> refreshLocation() async {
+      ref.invalidate(currentLocationProvider);
+      ref.invalidate(currentAddressProvider);
+      await ref.read(stationsProvider.future);
+    }
 
     return Scaffold(
       appBar: AppBar(
         titleSpacing: AppSpacing.base,
         title: InkWell(
-          onTap: () => showRegionPickerSheet(context),
+          onTap: refreshLocation,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -43,17 +48,20 @@ class HomePage extends ConsumerWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  region.short,
+                  asyncAddress.maybeWhen(
+                    data: (a) => a,
+                    orElse: () => '내 위치',
+                  ),
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 2),
+                const SizedBox(width: 4),
                 const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: 20,
+                  Icons.refresh_rounded,
+                  size: 18,
                   color: AppColors.textSecondary,
                 ),
               ],
@@ -69,7 +77,7 @@ class HomePage extends ConsumerWidget {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () async => ref.refresh(stationsProvider.future),
+          onRefresh: refreshLocation,
           child: asyncStations.when(
             loading: () => const _LoadingState(),
             error: (e, _) => _ErrorState(message: e.toString()),
