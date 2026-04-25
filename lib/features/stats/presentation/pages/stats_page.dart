@@ -4,6 +4,9 @@ import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/widgets/empty_view.dart';
+import 'package:fuelkeeper/core/widgets/error_view.dart';
+import 'package:fuelkeeper/core/widgets/skeleton.dart';
 import 'package:fuelkeeper/features/home/domain/station_brand.dart';
 import 'package:fuelkeeper/features/logs/application/fuel_log_providers.dart';
 import 'package:fuelkeeper/features/stats/application/stats_providers.dart';
@@ -28,8 +31,12 @@ class StatsPage extends ConsumerWidget {
         centerTitle: false,
       ),
       body: logsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('오류: $e')),
+        loading: () => const _StatsSkeleton(),
+        error: (e, _) => ErrorView(
+          title: '통계를 불러오지 못했어요',
+          message: '잠시 후 다시 시도해주세요',
+          onRetry: () => ref.invalidate(fuelLogsProvider),
+        ),
         data: (logs) {
           if (logs.isEmpty) return const _EmptyState();
           return const _StatsBody();
@@ -340,48 +347,122 @@ class _EmptyState extends StatelessWidget {
   const _EmptyState();
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: AppColors.bgSurface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.borderHair),
+    return const EmptyView(
+      icon: Icons.bar_chart_rounded,
+      title: '아직 통계 데이터가 없어요',
+      message: '주유 로그 탭에서 기록을 남기면\n자동으로 통계가 표시됩니다',
+    );
+  }
+}
+
+class _StatsSkeleton extends StatelessWidget {
+  const _StatsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.xxl,
+      ),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1F2937),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 100,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
-              child: const Icon(
-                Icons.bar_chart_rounded,
-                color: AppColors.textTertiary,
-                size: 28,
+              const SizedBox(height: AppSpacing.base),
+              Container(
+                width: 180,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            const Text(
-              '아직 통계 데이터가 없어요',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+              const SizedBox(height: AppSpacing.lg),
+              Row(
+                children: List.generate(3, (i) {
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: i == 2 ? 0 : 8),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: 60,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
               ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              '주유 로그 탭에서 기록을 남기면\n자동으로 통계가 표시됩니다',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textTertiary,
-                height: 1.5,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
+        const SizedBox(height: AppSpacing.lg),
+        const _SkeletonCard(chartHeight: 140),
+        const SizedBox(height: AppSpacing.lg),
+        const _SkeletonCard(chartHeight: 140),
+      ],
+    );
+  }
+}
+
+class _SkeletonCard extends StatelessWidget {
+  const _SkeletonCard({required this.chartHeight});
+  final double chartHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.bgSurface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.borderHair),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Skeleton(width: 100, height: 14),
+              Spacer(),
+              Skeleton(width: 60, height: 10),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.base),
+          Skeleton(height: chartHeight, radius: 8),
+        ],
       ),
     );
   }

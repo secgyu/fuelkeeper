@@ -36,70 +36,110 @@ class _MapPageState extends ConsumerState<MapPage> {
       orElse: () => _fallbackTarget,
     );
 
+    ref.listen<AsyncValue<List<Station>>>(stationsProvider, (prev, next) {
+      next.whenData((stations) async {
+        final controller = _controller;
+        if (controller == null) return;
+        await controller.clearOverlays();
+        await _addMarkers(controller, stations, fuelType);
+      });
+    });
+
+    final stations = stationsAsync.maybeWhen(
+      data: (s) => s,
+      orElse: () => const <Station>[],
+    );
+    final isLoading = stationsAsync.isLoading;
+    final error = stationsAsync.hasError ? stationsAsync.error : null;
+    final isEmpty = !isLoading && error == null && stations.isEmpty;
+
     return Scaffold(
       backgroundColor: AppColors.bgPrimary,
-      body: stationsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('오류: $e')),
-        data: (stations) {
-          return Stack(
-            children: [
-              NaverMap(
-                options: NaverMapViewOptions(
-                  initialCameraPosition: NCameraPosition(
-                    target: initialTarget,
-                    zoom: 14,
-                  ),
-                  mapType: NMapType.basic,
-                  activeLayerGroups: const [NLayerGroup.building],
-                  locationButtonEnable: false,
-                  rotationGesturesEnable: false,
-                  tiltGesturesEnable: false,
-                  logoAlign: NLogoAlign.leftBottom,
-                  logoMargin: const EdgeInsets.only(left: 12, bottom: 24),
-                ),
-                onMapReady: (controller) async {
-                  _controller = controller;
-                  await _addMarkers(controller, stations, fuelType);
-                },
+      body: Stack(
+        children: [
+          NaverMap(
+            options: NaverMapViewOptions(
+              initialCameraPosition: NCameraPosition(
+                target: initialTarget,
+                zoom: 14,
               ),
-              SafeArea(
-                child: _TopBar(
+              mapType: NMapType.basic,
+              activeLayerGroups: const [NLayerGroup.building],
+              locationButtonEnable: false,
+              rotationGesturesEnable: false,
+              tiltGesturesEnable: false,
+              logoAlign: NLogoAlign.leftBottom,
+              logoMargin: const EdgeInsets.only(left: 12, bottom: 24),
+            ),
+            onMapReady: (controller) async {
+              _controller = controller;
+              await _addMarkers(controller, stations, fuelType);
+            },
+          ),
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _TopBar(
                   fuelType: fuelType,
                   onTap: () => _showFuelSheet(context, fuelType),
                 ),
-              ),
-              if (_selected != null)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _StationCard(
-                    station: _selected!,
-                    fuelType: fuelType,
-                    onClose: () => setState(() => _selected = null),
-                    onTap: () => context.push(
-                      AppRoutes.stationDetail(_selected!.id),
-                    ),
+                if (isLoading)
+                  const _StatusBanner(
+                    icon: Icons.refresh_rounded,
+                    text: '주유소 정보를 불러오는 중...',
+                    spinning: true,
                   ),
-                ),
-              Positioned(
-                right: AppSpacing.lg,
-                bottom: _selected == null
-                    ? AppSpacing.lg
-                    : AppSpacing.lg + 180,
-                child: _MyLocationButton(
-                  onPressed: () => _controller?.updateCamera(
-                    NCameraUpdate.scrollAndZoomTo(
-                      target: initialTarget,
-                      zoom: 14,
-                    ),
+                if (error != null)
+                  _StatusBanner(
+                    icon: Icons.error_outline_rounded,
+                    text: '주유소 정보를 불러오지 못했어요',
+                    color: AppColors.danger,
+                    actionLabel: '재시도',
+                    onAction: () => ref.invalidate(stationsProvider),
                   ),
+              ],
+            ),
+          ),
+          if (isEmpty)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _EmptyMapCard(
+                fuelType: fuelType,
+                onChangeFuel: () => _showFuelSheet(context, fuelType),
+              ),
+            ),
+          if (_selected != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _StationCard(
+                station: _selected!,
+                fuelType: fuelType,
+                onClose: () => setState(() => _selected = null),
+                onTap: () => context.push(
+                  AppRoutes.stationDetail(_selected!.id),
                 ),
               ),
-            ],
-          );
-        },
+            ),
+          Positioned(
+            right: AppSpacing.lg,
+            bottom: _selected == null
+                ? (isEmpty ? AppSpacing.lg + 140 : AppSpacing.lg)
+                : AppSpacing.lg + 180,
+            child: _MyLocationButton(
+              onPressed: () => _controller?.updateCamera(
+                NCameraUpdate.scrollAndZoomTo(
+                  target: initialTarget,
+                  zoom: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -200,7 +240,9 @@ class _MapPageState extends ConsumerState<MapPage> {
         });
       markers.add(marker);
     }
-    await controller.addOverlayAll(markers);
+    if (markers.isNotEmpty) {
+      await controller.addOverlayAll(markers);
+    }
   }
 }
 
@@ -262,6 +304,168 @@ class _TopBar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StatusBanner extends StatelessWidget {
+  const _StatusBanner({
+    required this.icon,
+    required this.text,
+    this.color = AppColors.textSecondary,
+    this.spinning = false,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final String text;
+  final Color color;
+  final bool spinning;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Material(
+        color: AppColors.bgSurface,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.06),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (spinning)
+                const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 1.8),
+                )
+              else
+                Icon(icon, size: 16, color: color),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(width: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  onTap: onAction,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    child: Text(
+                      actionLabel!,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyMapCard extends StatelessWidget {
+  const _EmptyMapCard({required this.fuelType, required this.onChangeFuel});
+
+  final FuelType fuelType;
+  final VoidCallback onChangeFuel;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Material(
+          color: AppColors.bgSurface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          elevation: 6,
+          shadowColor: Colors.black.withValues(alpha: 0.12),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.base),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.bgMuted,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: const Icon(
+                    Icons.search_off_rounded,
+                    color: AppColors.textTertiary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '주변에 ${fuelType.label} 주유소가 없어요',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        '다른 연료로 변경해보세요',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: onChangeFuel,
+                  child: const Text(
+                    '연료 변경',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

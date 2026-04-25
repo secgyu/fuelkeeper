@@ -4,6 +4,9 @@ import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/widgets/empty_view.dart';
+import 'package:fuelkeeper/core/widgets/error_view.dart';
+import 'package:fuelkeeper/core/widgets/skeleton.dart';
 import 'package:fuelkeeper/features/favorites/presentation/widgets/favorite_button.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
@@ -36,17 +39,19 @@ class StationDetailPage extends ConsumerWidget {
       ),
       body: SafeArea(
         child: asyncStation.when(
-          loading: () => const Center(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.4),
-            ),
+          loading: () => const _DetailSkeleton(),
+          error: (e, _) => ErrorView(
+            title: '주유소 정보를 불러오지 못했어요',
+            message: '네트워크 상태를 확인하고 다시 시도해주세요',
+            onRetry: () => ref.invalidate(stationByIdProvider(stationId)),
           ),
-          error: (e, _) => Center(child: Text('주유소 정보를 불러오지 못했어요\n$e')),
           data: (station) {
             if (station == null) {
-              return const Center(child: Text('주유소를 찾을 수 없어요'));
+              return const EmptyView(
+                icon: Icons.local_gas_station_outlined,
+                title: '주유소를 찾을 수 없어요',
+                message: '삭제되었거나 위치가 변경되었을 수 있어요',
+              );
             }
             return _DetailBody(
               station: station,
@@ -617,6 +622,93 @@ class _Section extends StatelessWidget {
           ),
         ),
         child,
+      ],
+    );
+  }
+}
+
+class _DetailSkeleton extends StatelessWidget {
+  const _DetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.base,
+        AppSpacing.sm,
+        AppSpacing.base,
+        AppSpacing.xxl,
+      ),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: AppColors.bgSurface,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.borderHair),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Skeleton(width: 80, height: 12),
+              SizedBox(height: AppSpacing.sm),
+              Skeleton(width: 200, height: 22),
+              SizedBox(height: 6),
+              Skeleton(width: 240, height: 12),
+              SizedBox(height: AppSpacing.lg),
+              Skeleton(width: 160, height: 36),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.base),
+        Row(
+          children: const [
+            Expanded(child: Skeleton(height: 44, radius: 10)),
+            SizedBox(width: AppSpacing.md),
+            Expanded(flex: 2, child: Skeleton(height: 44, radius: 10)),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.base),
+          decoration: BoxDecoration(
+            color: AppColors.bgSurface,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.borderHair),
+          ),
+          child: Column(
+            children: List.generate(
+              3,
+              (i) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: const [
+                    Skeleton(width: 60, height: 14),
+                    Spacer(),
+                    Skeleton(width: 80, height: 14),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.base),
+          decoration: BoxDecoration(
+            color: AppColors.bgSurface,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.borderHair),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Skeleton(width: 100, height: 12),
+              SizedBox(height: AppSpacing.base),
+              Skeleton(height: 80, radius: 8),
+            ],
+          ),
+        ),
       ],
     );
   }
