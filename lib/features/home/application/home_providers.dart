@@ -6,7 +6,7 @@ import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/sort_order.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 
-const bool _useMock = bool.fromEnvironment('USE_MOCK', defaultValue: true);
+const bool _useMock = bool.fromEnvironment('USE_MOCK', defaultValue: false);
 
 final stationRepositoryProvider = Provider<StationRepository>((ref) {
   return _useMock ? MockStationRepository() : OpinetStationRepository();
