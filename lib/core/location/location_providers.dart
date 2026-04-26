@@ -24,16 +24,27 @@ final currentLocationProvider = FutureProvider<LatLng>((ref) async {
       return _fallbackLocation;
     }
 
-    final position = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.medium,
-        timeLimit: Duration(seconds: 6),
-      ),
-    );
-    if (!_isWithinKorea(position.latitude, position.longitude)) {
-      return _fallbackLocation;
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: AndroidSettings(
+          accuracy: LocationAccuracy.medium,
+          forceLocationManager: true,
+          timeLimit: const Duration(seconds: 12),
+        ),
+      );
+      if (_isWithinKorea(position.latitude, position.longitude)) {
+        return LatLng(position.latitude, position.longitude);
+      }
+    } catch (_) {
+      // 새 fix를 못 받으면 마지막 알려진 위치로 폴백
     }
-    return LatLng(position.latitude, position.longitude);
+
+    final last = await Geolocator.getLastKnownPosition();
+    if (last != null && _isWithinKorea(last.latitude, last.longitude)) {
+      return LatLng(last.latitude, last.longitude);
+    }
+
+    return _fallbackLocation;
   } catch (_) {
     return _fallbackLocation;
   }

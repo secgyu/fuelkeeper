@@ -52,6 +52,11 @@ class OpinetApi {
     return list.first as Map<String, dynamic>;
   }
 
+  Future<List<dynamic>> avgAllPrice() async {
+    final response = await _dio.get('/avgAllPrice.do');
+    return _extractOilList(response.data);
+  }
+
   Future<List<dynamic>> avgSidoPrice({required String prodcd}) async {
     final response = await _dio.get(
       '/avgSidoPrice.do',

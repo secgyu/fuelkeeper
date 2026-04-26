@@ -14,7 +14,6 @@ import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 import 'package:fuelkeeper/features/home/domain/station_amenity.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/price_text.dart';
-import 'package:fuelkeeper/features/station_detail/presentation/widgets/price_history_chart.dart';
 
 class StationDetailPage extends ConsumerWidget {
   const StationDetailPage({super.key, required this.stationId});
@@ -119,8 +118,6 @@ class _DetailBody extends StatelessWidget {
         _ActionRow(station: station),
         const SizedBox(height: AppSpacing.lg),
         _FuelPriceTable(station: station, currentFuel: fuelType),
-        const SizedBox(height: AppSpacing.lg),
-        _PriceHistorySection(station: station, fuelType: fuelType),
         const SizedBox(height: AppSpacing.lg),
         _InfoSection(station: station),
       ],
@@ -380,105 +377,6 @@ class _FuelPriceRow extends StatelessWidget {
             size: 16,
             weight: FontWeight.w700,
             color: isCurrent ? AppColors.primary : AppColors.textPrimary,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PriceHistorySection extends StatelessWidget {
-  const _PriceHistorySection({required this.station, required this.fuelType});
-
-  final Station station;
-  final FuelType fuelType;
-
-  @override
-  Widget build(BuildContext context) {
-    final history = station.historyOf(fuelType);
-    final hasData = history.length >= 2;
-    final minV = hasData ? history.reduce((a, b) => a < b ? a : b) : 0;
-    final maxV = hasData ? history.reduce((a, b) => a > b ? a : b) : 0;
-    final last = hasData ? history.last : 0;
-
-    return _Section(
-      title: '7일 가격 추이',
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.base),
-        decoration: BoxDecoration(
-          color: AppColors.bgSurface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.borderHair),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PriceHistoryChart(values: history),
-            if (hasData) ...[
-              const SizedBox(height: AppSpacing.base),
-              Row(
-                children: [
-                  _HistoryStat(
-                    label: '최저',
-                    value: minV,
-                    color: AppColors.accent,
-                  ),
-                  Container(
-                    width: 1,
-                    height: 28,
-                    color: AppColors.borderHair,
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                  _HistoryStat(
-                    label: '현재',
-                    value: last,
-                    color: AppColors.textPrimary,
-                  ),
-                  Container(
-                    width: 1,
-                    height: 28,
-                    color: AppColors.borderHair,
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                  _HistoryStat(
-                    label: '최고',
-                    value: maxV,
-                    color: AppColors.danger,
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HistoryStat extends StatelessWidget {
-  const _HistoryStat({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final int value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: AppTypography.caption),
-          const SizedBox(height: 2),
-          PriceText(
-            amount: value,
-            size: 14,
-            weight: FontWeight.w700,
-            color: color,
           ),
         ],
       ),

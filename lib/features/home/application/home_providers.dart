@@ -1,16 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
-import 'package:fuelkeeper/features/home/data/mock_station_repository.dart';
+import 'package:fuelkeeper/core/network/opinet_api.dart';
+import 'package:fuelkeeper/features/home/data/opinet_codes.dart';
 import 'package:fuelkeeper/features/home/data/opinet_station_repository.dart';
 import 'package:fuelkeeper/features/home/data/station_repository.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/sort_order.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 
-const bool _useMock = bool.fromEnvironment('USE_MOCK', defaultValue: false);
+final opinetApiProvider = Provider<OpinetApi>((ref) => OpinetApi());
 
 final stationRepositoryProvider = Provider<StationRepository>((ref) {
-  return _useMock ? MockStationRepository() : OpinetStationRepository();
+  return OpinetStationRepository(api: ref.watch(opinetApiProvider));
 });
 
 class SelectedFuelType extends Notifier<FuelType> {
@@ -92,14 +93,38 @@ final neighborhoodAverageProvider = Provider<AsyncValue<int?>>((ref) {
   });
 });
 
-const Map<FuelType, int> _nationalAverageMock = {
-  FuelType.gasoline: 1932,
-  FuelType.premiumGasoline: 2235,
-  FuelType.diesel: 1768,
-  FuelType.lpg: 1105,
-};
+final nationalAveragesProvider = FutureProvider<Map<FuelType, int>>((ref) async {
+  final api = ref.watch(opinetApiProvider);
+  final list = await api.avgAllPrice();
+  final result = <FuelType, int>{};
+  for (final raw in list) {
+    if (raw is! Map) continue;
+    final code = raw['PRODCD'] as String?;
+    final fuelType = OpinetCodes.fuelFromCode(code);
+    final price = _parsePrice(raw['PRICE']);
+    if (fuelType != null && price != null) {
+      result[fuelType] = price;
+    }
+  }
+  return result;
+});
 
 final nationalAverageProvider = Provider<int?>((ref) {
+  final asyncMap = ref.watch(nationalAveragesProvider);
   final fuelType = ref.watch(selectedFuelTypeProvider);
-  return _nationalAverageMock[fuelType];
+  return asyncMap.maybeWhen(
+    data: (map) => map[fuelType],
+    orElse: () => null,
+  );
 });
+
+int? _parsePrice(dynamic v) {
+  if (v == null) return null;
+  if (v is num) return v.round();
+  if (v is String) {
+    final trimmed = v.trim();
+    if (trimmed.isEmpty) return null;
+    return double.tryParse(trimmed)?.round();
+  }
+  return null;
+}
