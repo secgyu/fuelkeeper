@@ -4,6 +4,7 @@ import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/utils/external_launcher.dart';
 import 'package:fuelkeeper/core/widgets/empty_view.dart';
 import 'package:fuelkeeper/core/widgets/error_view.dart';
 import 'package:fuelkeeper/core/widgets/skeleton.dart';
@@ -96,7 +97,7 @@ class _DetailBody extends StatelessWidget {
           fuelType: fuelType,
         ),
         const SizedBox(height: AppSpacing.base),
-        const _ActionRow(),
+        _ActionRow(station: station),
         const SizedBox(height: AppSpacing.lg),
         _FuelPriceTable(station: station, currentFuel: fuelType),
         const SizedBox(height: AppSpacing.lg),
@@ -243,15 +244,20 @@ class _HeaderCard extends StatelessWidget {
 }
 
 class _ActionRow extends StatelessWidget {
-  const _ActionRow();
+  const _ActionRow({required this.station});
+
+  final Station station;
 
   @override
   Widget build(BuildContext context) {
+    final hasPhone = station.phone.trim().isNotEmpty;
     return Row(
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: hasPhone
+                ? () => ExternalLauncher.phoneCall(context, station.phone)
+                : null,
             icon: const Icon(Icons.call_outlined, size: 18),
             label: const Text('전화'),
           ),
@@ -260,7 +266,12 @@ class _ActionRow extends StatelessWidget {
         Expanded(
           flex: 2,
           child: FilledButton.icon(
-            onPressed: () {},
+            onPressed: () => ExternalLauncher.drivingDirections(
+              context,
+              latitude: station.latitude,
+              longitude: station.longitude,
+              name: station.name,
+            ),
             icon: const Icon(Icons.directions_rounded, size: 20),
             label: const Text('길찾기'),
           ),

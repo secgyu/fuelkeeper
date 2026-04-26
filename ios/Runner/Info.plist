@@ -6,6 +6,11 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>현재 위치 기준으로 주변 주유소의 실시간 가격을 보여드릴게요.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>nmap</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
