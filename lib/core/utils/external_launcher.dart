@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ExternalLauncher {
@@ -48,6 +49,48 @@ class ExternalLauncher {
     if (!ok && context.mounted) {
       _snack(context, '지도 앱을 열 수 없어요');
     }
+  }
+
+  static Future<void> shareStation(
+    BuildContext context, {
+    required String name,
+    required String address,
+    required String fuelLabel,
+    required int price,
+  }) async {
+    final formatted = _formatThousands(price);
+    final mapUrl =
+        'https://map.naver.com/p/search/${Uri.encodeComponent(name)}';
+
+    final text = StringBuffer()
+      ..writeln('⛽ $name')
+      ..writeln()
+      ..writeln('$fuelLabel  ${formatted}원/L')
+      ..writeln(address)
+      ..writeln()
+      ..writeln('지도에서 보기')
+      ..write(mapUrl);
+
+    try {
+      await SharePlus.instance.share(
+        ShareParams(text: text.toString(), subject: name),
+      );
+    } catch (_) {
+      if (context.mounted) {
+        _snack(context, '공유할 수 없어요');
+      }
+    }
+  }
+
+  static String _formatThousands(int v) {
+    final s = v.toString();
+    final buf = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      buf.write(s[i]);
+      final remain = s.length - i - 1;
+      if (remain > 0 && remain % 3 == 0) buf.write(',');
+    }
+    return buf.toString();
   }
 
   static void _snack(BuildContext context, String msg) {

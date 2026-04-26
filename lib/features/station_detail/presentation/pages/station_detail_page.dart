@@ -27,11 +27,30 @@ class StationDetailPage extends ConsumerWidget {
     final fuelType = ref.watch(selectedFuelTypeProvider);
     final national = ref.watch(nationalAverageProvider);
 
+    final loadedStation = asyncStation.maybeWhen(
+      data: (s) => s,
+      orElse: () => null,
+    );
+    final canShare =
+        loadedStation != null && loadedStation.priceOf(fuelType) != null;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('주유소 정보'),
         actions: [
-          IconButton(icon: const Icon(Icons.share_outlined), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            tooltip: '공유',
+            onPressed: canShare
+                ? () => ExternalLauncher.shareStation(
+                      context,
+                      name: loadedStation.name,
+                      address: loadedStation.address,
+                      fuelLabel: fuelType.label,
+                      price: loadedStation.priceOf(fuelType)!,
+                    )
+                : null,
+          ),
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.xs),
             child: FavoriteButton(stationId: stationId),
