@@ -3,13 +3,17 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
-import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
-import 'package:fuelkeeper/app/theme/app_typography.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
+import 'package:fuelkeeper/features/map/presentation/widgets/empty_map_card.dart';
+import 'package:fuelkeeper/features/map/presentation/widgets/fuel_chip_button.dart';
+import 'package:fuelkeeper/features/map/presentation/widgets/fuel_picker_sheet.dart';
+import 'package:fuelkeeper/features/map/presentation/widgets/my_location_fab.dart';
+import 'package:fuelkeeper/features/map/presentation/widgets/station_preview_card.dart';
+import 'package:fuelkeeper/features/map/presentation/widgets/status_banner.dart';
 import 'package:go_router/go_router.dart';
 
 class MapPage extends ConsumerStatefulWidget {
@@ -20,10 +24,12 @@ class MapPage extends ConsumerStatefulWidget {
 }
 
 class _MapPageState extends ConsumerState<MapPage> {
+  static const _fallbackTarget = NLatLng(37.4979, 127.0276);
+  static const _defaultZoom = 14.0;
+  static const _selectedZoom = 15.5;
+
   NaverMapController? _controller;
   Station? _selected;
-
-  static const _fallbackTarget = NLatLng(37.4979, 127.0276);
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +67,7 @@ class _MapPageState extends ConsumerState<MapPage> {
             options: NaverMapViewOptions(
               initialCameraPosition: NCameraPosition(
                 target: initialTarget,
-                zoom: 14,
+                zoom: _defaultZoom,
               ),
               mapType: NMapType.basic,
               activeLayerGroups: const [NLayerGroup.building],
@@ -80,18 +86,18 @@ class _MapPageState extends ConsumerState<MapPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _TopBar(
+                FuelChipButton(
                   fuelType: fuelType,
-                  onTap: () => _showFuelSheet(context, fuelType),
+                  onTap: () => _openFuelPicker(fuelType),
                 ),
                 if (isLoading)
-                  const _StatusBanner(
+                  const StatusBanner(
                     icon: Icons.refresh_rounded,
                     text: '주유소 정보를 불러오는 중...',
                     spinning: true,
                   ),
                 if (error != null)
-                  _StatusBanner(
+                  StatusBanner(
                     icon: Icons.error_outline_rounded,
                     text: '주유소 정보를 불러오지 못했어요',
                     color: AppColors.danger,
@@ -106,9 +112,9 @@ class _MapPageState extends ConsumerState<MapPage> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: _EmptyMapCard(
+              child: EmptyMapCard(
                 fuelType: fuelType,
-                onChangeFuel: () => _showFuelSheet(context, fuelType),
+                onChangeFuel: () => _openFuelPicker(fuelType),
               ),
             ),
           if (_selected != null)
@@ -116,7 +122,7 @@ class _MapPageState extends ConsumerState<MapPage> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: _StationCard(
+              child: StationPreviewCard(
                 station: _selected!,
                 fuelType: fuelType,
                 onClose: () => setState(() => _selected = null),
@@ -130,11 +136,11 @@ class _MapPageState extends ConsumerState<MapPage> {
             bottom: _selected == null
                 ? (isEmpty ? AppSpacing.lg + 140 : AppSpacing.lg)
                 : AppSpacing.lg + 180,
-            child: _MyLocationButton(
+            child: MyLocationFab(
               onPressed: () => _controller?.updateCamera(
                 NCameraUpdate.scrollAndZoomTo(
                   target: initialTarget,
-                  zoom: 14,
+                  zoom: _defaultZoom,
                 ),
               ),
             ),
@@ -144,69 +150,11 @@ class _MapPageState extends ConsumerState<MapPage> {
     );
   }
 
-  Future<void> _showFuelSheet(BuildContext context, FuelType current) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.bgSurface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    AppSpacing.sm,
-                    AppSpacing.lg,
-                    AppSpacing.md,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '연료 선택',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                  ),
-                ),
-                ...FuelType.values.map((fuel) {
-                  final isSelected = fuel == current;
-                  return ListTile(
-                    title: Text(
-                      fuel.label,
-                      style: TextStyle(
-                        fontWeight:
-                            isSelected ? FontWeight.w800 : FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    trailing: isSelected
-                        ? const Icon(
-                            Icons.check_rounded,
-                            color: AppColors.textPrimary,
-                          )
-                        : null,
-                    onTap: () {
-                      ref.read(selectedFuelTypeProvider.notifier).set(fuel);
-                      Navigator.of(sheetContext).pop();
-                    },
-                  );
-                }),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  Future<void> _openFuelPicker(FuelType current) async {
+    final picked = await showFuelPickerSheet(context, current: current);
+    if (picked != null) {
+      ref.read(selectedFuelTypeProvider.notifier).set(picked);
+    }
   }
 
   Future<void> _addMarkers(
@@ -233,7 +181,7 @@ class _MapPageState extends ConsumerState<MapPage> {
           controller.updateCamera(
             NCameraUpdate.scrollAndZoomTo(
               target: NLatLng(s.latitude, s.longitude),
-              zoom: 15.5,
+              zoom: _selectedZoom,
             ),
           );
           return true;
@@ -243,372 +191,5 @@ class _MapPageState extends ConsumerState<MapPage> {
     if (markers.isNotEmpty) {
       await controller.addOverlayAll(markers);
     }
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.fuelType, required this.onTap});
-  final FuelType fuelType;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          Material(
-            color: AppColors.bgSurface,
-            borderRadius: BorderRadius.circular(999),
-            elevation: 2,
-            shadowColor: Colors.black.withValues(alpha: 0.06),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(999),
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.local_gas_station_rounded,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      fuelType.label,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 18,
-                      color: AppColors.textTertiary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusBanner extends StatelessWidget {
-  const _StatusBanner({
-    required this.icon,
-    required this.text,
-    this.color = AppColors.textSecondary,
-    this.spinning = false,
-    this.actionLabel,
-    this.onAction,
-  });
-
-  final IconData icon;
-  final String text;
-  final Color color;
-  final bool spinning;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        0,
-        AppSpacing.lg,
-        AppSpacing.sm,
-      ),
-      child: Material(
-        color: AppColors.bgSurface,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-        elevation: 2,
-        shadowColor: Colors.black.withValues(alpha: 0.06),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (spinning)
-                const SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(strokeWidth: 1.8),
-                )
-              else
-                Icon(icon, size: 16, color: color),
-              const SizedBox(width: 8),
-              Text(
-                text,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                  letterSpacing: -0.2,
-                ),
-              ),
-              if (actionLabel != null && onAction != null) ...[
-                const SizedBox(width: 10),
-                InkWell(
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                  onTap: onAction,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    child: Text(
-                      actionLabel!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyMapCard extends StatelessWidget {
-  const _EmptyMapCard({required this.fuelType, required this.onChangeFuel});
-
-  final FuelType fuelType;
-  final VoidCallback onChangeFuel;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Material(
-          color: AppColors.bgSurface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          elevation: 6,
-          shadowColor: Colors.black.withValues(alpha: 0.12),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.base),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.bgMuted,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                  child: const Icon(
-                    Icons.search_off_rounded,
-                    color: AppColors.textTertiary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '주변에 ${fuelType.label} 주유소가 없어요',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      const Text(
-                        '다른 연료로 변경해보세요',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textTertiary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: onChangeFuel,
-                  child: const Text(
-                    '연료 변경',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MyLocationButton extends StatelessWidget {
-  const _MyLocationButton({required this.onPressed});
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.bgSurface,
-      shape: const CircleBorder(),
-      elevation: 4,
-      shadowColor: Colors.black.withValues(alpha: 0.12),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onPressed,
-        child: const SizedBox(
-          width: 48,
-          height: 48,
-          child: Icon(
-            Icons.my_location_rounded,
-            color: AppColors.textPrimary,
-            size: 22,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StationCard extends StatelessWidget {
-  const _StationCard({
-    required this.station,
-    required this.fuelType,
-    required this.onClose,
-    required this.onTap,
-  });
-
-  final Station station;
-  final FuelType fuelType;
-  final VoidCallback onClose;
-  final VoidCallback onTap;
-
-  String _fmt(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final price = station.priceOf(fuelType);
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Material(
-          color: AppColors.bgSurface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          elevation: 6,
-          shadowColor: Colors.black.withValues(alpha: 0.12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.base),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: station.brand.color,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          station.name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${station.brand.label} · ${station.distanceKm.toStringAsFixed(1)}km',
-                          style: AppTypography.caption,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (price != null)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${_fmt(price)}원',
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
-                            letterSpacing: -0.4,
-                          ),
-                        ),
-                        Text(
-                          fuelType.label,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.close_rounded,
-                      size: 18,
-                      color: AppColors.textTertiary,
-                    ),
-                    onPressed: onClose,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
