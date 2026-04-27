@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 
 class LogsEmptyState extends StatelessWidget {
@@ -17,7 +18,7 @@ class LogsEmptyState extends StatelessWidget {
             height: 64,
             decoration: BoxDecoration(
               color: AppColors.bgSurface,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(color: AppColors.borderHair),
             ),
             child: const Icon(

@@ -210,12 +210,12 @@ class _PageIndicator extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           width: selected ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : AppColors.borderHair,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
         );
       }),

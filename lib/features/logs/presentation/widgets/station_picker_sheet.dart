@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 import 'package:fuelkeeper/core/utils/formatters.dart';
@@ -20,7 +21,7 @@ class StationPickerSheet extends StatelessWidget {
         return Container(
           decoration: const BoxDecoration(
             color: AppColors.bgSurface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
           ),
           child: Column(
             children: [
@@ -30,7 +31,7 @@ class StationPickerSheet extends StatelessWidget {
                 height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.borderHair,
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
               ),
               const SizedBox(height: AppSpacing.base),

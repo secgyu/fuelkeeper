@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 
@@ -26,11 +27,11 @@ class FuelChipButton extends StatelessWidget {
         children: [
           Material(
             color: AppColors.bgSurface,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(AppRadius.full),
             elevation: 2,
             shadowColor: Colors.black.withValues(alpha: 0.06),
             child: InkWell(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppRadius.full),
               onTap: onTap,
               child: Padding(
                 padding: const EdgeInsets.symmetric(

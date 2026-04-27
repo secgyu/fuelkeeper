@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
@@ -37,7 +38,7 @@ class FuelTypeSettingTile extends ConsumerWidget {
       context: context,
       backgroundColor: AppColors.bgPrimary,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
       builder: (_) => _FuelTypePickerSheet(current: current),
     );

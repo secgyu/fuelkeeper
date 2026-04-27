@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
@@ -35,9 +36,9 @@ class HomePage extends ConsumerWidget {
         titleSpacing: AppSpacing.base,
         title: InkWell(
           onTap: refreshLocation,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppRadius.xs),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            padding: const EdgeInsets.all(AppSpacing.xs),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 
@@ -51,7 +52,7 @@ class PlaceholderPage extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.bgMuted,
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(AppRadius.full),
                   ),
                   child: const Text(
                     '곧 만나요',
