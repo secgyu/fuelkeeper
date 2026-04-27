@@ -4,9 +4,9 @@ import 'package:fuelkeeper/features/favorites/presentation/pages/favorites_page.
 import 'package:fuelkeeper/features/home/presentation/pages/home_page.dart';
 import 'package:fuelkeeper/features/logs/presentation/pages/logs_page.dart';
 import 'package:fuelkeeper/features/map/presentation/pages/map_page.dart';
-import 'package:fuelkeeper/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:fuelkeeper/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:fuelkeeper/features/onboarding/presentation/pages/permission_page.dart';
+import 'package:fuelkeeper/features/settings/presentation/pages/settings_page.dart';
 import 'package:fuelkeeper/features/shell/presentation/main_shell.dart';
 import 'package:fuelkeeper/features/splash/presentation/pages/splash_page.dart';
 import 'package:fuelkeeper/features/station_detail/presentation/pages/station_detail_page.dart';
@@ -25,7 +25,7 @@ class AppRoutes {
   static const logs = '/logs';
   static const stats = '/stats';
 
-  static const notifications = '/notifications';
+  static const settings = '/settings';
   static const station = '/station';
 
   static String stationDetail(String id) => '$station/$id';
@@ -50,8 +50,8 @@ final GoRouter appRouter = GoRouter(
           const NoTransitionPage(child: PermissionPage()),
     ),
     GoRoute(
-      path: AppRoutes.notifications,
-      builder: (context, state) => const NotificationsPage(),
+      path: AppRoutes.settings,
+      builder: (context, state) => const SettingsPage(),
     ),
     GoRoute(
       path: '${AppRoutes.station}/:id',
