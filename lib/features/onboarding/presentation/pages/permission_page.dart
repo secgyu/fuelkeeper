@@ -62,12 +62,19 @@ class _PermissionPageState extends ConsumerState<PermissionPage> {
                 width: 96,
                 height: 96,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.10),
+                  color: AppColors.brandPrimary,
                   borderRadius: BorderRadius.circular(AppRadius.xl),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.brandPrimary.withValues(alpha: 0.18),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.location_on_rounded,
-                  color: AppColors.primary,
+                  color: Colors.white,
                   size: 44,
                 ),
               ),
@@ -120,6 +127,13 @@ class _PermissionPageState extends ConsumerState<PermissionPage> {
                 height: 56,
                 child: FilledButton(
                   onPressed: _busy ? null : _allow,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brandPrimary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                  ),
                   child: _busy
                       ? const SizedBox(
                           width: 22,
@@ -134,6 +148,7 @@ class _PermissionPageState extends ConsumerState<PermissionPage> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
                           ),
                         ),
                 ),

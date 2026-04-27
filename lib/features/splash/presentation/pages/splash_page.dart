@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
+import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/features/onboarding/application/onboarding_providers.dart';
 import 'package:go_router/go_router.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
-  static const Color background = Color(0xFF1A3FAA);
+  static const Color background = AppColors.brandPrimary;
 
   @override
   ConsumerState<SplashPage> createState() => _SplashPageState();
@@ -39,7 +40,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
     ]);
     if (!mounted) return;
     final completed = results[1] as bool;
-    context.go(completed ? AppRoutes.home : AppRoutes.onboarding);
+    context.go(completed ? AppRoutes.home : AppRoutes.permission);
   }
 
   @override

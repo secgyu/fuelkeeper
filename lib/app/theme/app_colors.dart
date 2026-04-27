@@ -12,6 +12,10 @@ class AppColors {
   static const textSecondary = Color(0xFF5C6068);
   static const textTertiary = Color(0xFF9AA0A6);
 
+  /// 스플래시·온보딩에서 쓰는 브랜드 딥 블루.
+  /// 강한 톤의 단일 컬러로 브랜드 식별성을 만든다.
+  static const brandPrimary = Color(0xFF1A3FAA);
+
   static const primary = Color(0xFF2962FF);
   static const accent = Color(0xFF00B383);
   static const danger = Color(0xFFFF4D4F);
