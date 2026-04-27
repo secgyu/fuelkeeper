@@ -1,23 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/logs/application/fuel_log_providers.dart';
 
 class MonthlySummaryCard extends StatelessWidget {
   const MonthlySummaryCard({super.key, required this.summary});
 
   final MonthlySummary summary;
-
-  String _formatNumber(num v) {
-    final s = v.round().toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +49,7 @@ class MonthlySummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.base),
           Text(
-            '₩ ${_formatNumber(summary.totalCost)}',
+            Formatters.currency(summary.totalCost),
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -73,7 +63,7 @@ class MonthlySummaryCard extends StatelessWidget {
               Expanded(
                 child: _MetricCell(
                   label: '총 주유량',
-                  value: '${summary.totalLiters.toStringAsFixed(1)} L',
+                  value: Formatters.liters(summary.totalLiters),
                 ),
               ),
               Container(
@@ -84,9 +74,7 @@ class MonthlySummaryCard extends StatelessWidget {
               Expanded(
                 child: _MetricCell(
                   label: '평균 연비',
-                  value: summary.avgEfficiency == null
-                      ? '—'
-                      : '${summary.avgEfficiency!.toStringAsFixed(1)} km/L',
+                  value: Formatters.efficiency(summary.avgEfficiency),
                 ),
               ),
             ],

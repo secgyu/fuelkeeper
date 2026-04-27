@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 
@@ -100,8 +101,7 @@ class DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatted =
-        '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
+    final formatted = Formatters.date(date);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.md),
@@ -253,17 +253,6 @@ class TotalCostSummaryCard extends StatelessWidget {
 
   final int totalCost;
 
-  String _format(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -285,7 +274,7 @@ class TotalCostSummaryCard extends StatelessWidget {
             ),
           ),
           Text(
-            '₩ ${_format(totalCost)}',
+            Formatters.currency(totalCost),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,

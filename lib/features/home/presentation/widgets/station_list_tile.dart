@@ -3,6 +3,7 @@ import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/favorites/presentation/widgets/favorite_button.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
@@ -98,7 +99,7 @@ class StationListTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${station.distanceKm.toStringAsFixed(1)}km',
+                          Formatters.km(station.distanceKm),
                           style: AppTypography.caption,
                         ),
                         if (station.isSelfService) ...[

@@ -3,6 +3,7 @@ import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/price_text.dart';
@@ -78,7 +79,7 @@ class _BrandRow extends StatelessWidget {
         ],
         const Spacer(),
         Text(
-          '${station.distanceKm.toStringAsFixed(1)}km',
+          Formatters.km(station.distanceKm),
           style: AppTypography.caption,
         ),
       ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 
 class StationPickerSheet extends StatelessWidget {
@@ -68,7 +69,7 @@ class StationPickerSheet extends StatelessWidget {
                         ),
                       ),
                       subtitle: Text(
-                        '${s.brand.label} · ${s.distanceKm.toStringAsFixed(1)}km',
+                        '${s.brand.label} · ${Formatters.km(s.distanceKm)}',
                         style: AppTypography.caption,
                       ),
                     );

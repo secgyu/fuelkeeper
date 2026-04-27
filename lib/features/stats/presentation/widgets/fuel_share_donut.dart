@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/stats/application/stats_providers.dart';
 
@@ -113,17 +114,6 @@ class _Legend extends StatelessWidget {
   const _Legend({required this.shares});
   final List<FuelTypeShare> shares;
 
-  String _fmt(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -163,7 +153,7 @@ class _Legend extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '₩${_fmt(s.totalCost)}',
+                  '₩${Formatters.thousands(s.totalCost)}',
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

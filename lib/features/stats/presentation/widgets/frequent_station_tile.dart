@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/home/domain/station_brand.dart';
 import 'package:fuelkeeper/features/stats/application/stats_providers.dart';
 
@@ -8,17 +9,6 @@ class FrequentStationTile extends StatelessWidget {
   const FrequentStationTile({super.key, required this.station});
 
   final FrequentStation station;
-
-  String _formatNumber(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +41,7 @@ class FrequentStationTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${station.visits}회 · ₩${_formatNumber(station.totalCost)}',
+                  '${station.visits}회 · ₩${Formatters.thousands(station.totalCost)}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

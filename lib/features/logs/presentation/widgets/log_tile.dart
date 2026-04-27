@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/logs/domain/fuel_log.dart';
 
 class LogTile extends StatelessWidget {
@@ -9,17 +10,6 @@ class LogTile extends StatelessWidget {
 
   final FuelLog log;
   final VoidCallback onDelete;
-
-  String _formatNumber(num v) {
-    final s = v.round().toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +67,8 @@ class LogTile extends StatelessWidget {
                     Text(
                       '${log.date.month}.${log.date.day.toString().padLeft(2, '0')}'
                       ' · ${log.fuelType.label}'
-                      ' · ${log.liters.toStringAsFixed(1)}L'
-                      ' · ${_formatNumber(log.odometerKm)}km',
+                      ' · ${Formatters.liters(log.liters)}'
+                      ' · ${Formatters.thousands(log.odometerKm)}km',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -92,7 +82,7 @@ class LogTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '₩ ${_formatNumber(log.totalCost)}',
+                    Formatters.currency(log.totalCost),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -102,7 +92,7 @@ class LogTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${_formatNumber(log.pricePerLiter)}원/L',
+                    '${Formatters.thousands(log.pricePerLiter)}원/L',
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,

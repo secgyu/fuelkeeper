@@ -3,6 +3,7 @@ import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 
@@ -19,17 +20,6 @@ class StationPreviewCard extends StatelessWidget {
   final FuelType fuelType;
   final VoidCallback onClose;
   final VoidCallback onTap;
-
-  String _formatPrice(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +64,7 @@ class StationPreviewCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${station.brand.label} · ${station.distanceKm.toStringAsFixed(1)}km',
+                          '${station.brand.label} · ${Formatters.km(station.distanceKm)}',
                           style: AppTypography.caption,
                         ),
                       ],
@@ -85,7 +75,7 @@ class StationPreviewCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '${_formatPrice(price)}원',
+                          Formatters.won(price),
                           style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,

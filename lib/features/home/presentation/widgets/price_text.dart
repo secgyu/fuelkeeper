@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 
 class PriceText extends StatelessWidget {
   const PriceText({
@@ -21,7 +22,7 @@ class PriceText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatted = _format(amount);
+    final formatted = Formatters.thousands(amount);
     return RichText(
       text: TextSpan(
         style: TextStyle(
@@ -50,16 +51,5 @@ class PriceText extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static String _format(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
   }
 }

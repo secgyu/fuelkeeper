@@ -1,23 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
+import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/stats/application/stats_providers.dart';
 
 class StatsOverviewCard extends StatelessWidget {
   const StatsOverviewCard({super.key, required this.overview});
 
   final StatsOverview overview;
-
-  String _formatNumber(num v) {
-    final s = v.round().toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      buf.write(s[i]);
-      final remain = s.length - i - 1;
-      if (remain > 0 && remain % 3 == 0) buf.write(',');
-    }
-    return buf.toString();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +42,7 @@ class StatsOverviewCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.base),
           Text(
-            '₩ ${_formatNumber(overview.totalCost)}',
+            Formatters.currency(overview.totalCost),
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -73,16 +63,14 @@ class StatsOverviewCard extends StatelessWidget {
               Expanded(
                 child: _Metric(
                   label: '총 주유량',
-                  value: '${overview.totalLiters.toStringAsFixed(1)}L',
+                  value: Formatters.liters(overview.totalLiters),
                 ),
               ),
               const _MetricDivider(),
               Expanded(
                 child: _Metric(
                   label: '평균 연비',
-                  value: overview.avgEfficiency == null
-                      ? '—'
-                      : '${overview.avgEfficiency!.toStringAsFixed(1)}km/L',
+                  value: Formatters.efficiency(overview.avgEfficiency),
                 ),
               ),
             ],
