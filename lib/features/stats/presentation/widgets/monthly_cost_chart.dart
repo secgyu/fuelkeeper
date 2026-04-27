@@ -31,7 +31,7 @@ class _MonthlyCostPainter extends CustomPainter {
     const labelHeight = 20.0;
     const valueHeight = 18.0;
     final chartHeight = size.height - labelHeight - valueHeight;
-    final chartTop = valueHeight;
+    const chartTop = valueHeight;
 
     final maxCost = buckets
         .map((b) => b.totalCost)

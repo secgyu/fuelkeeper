@@ -65,7 +65,7 @@ class ExternalLauncher {
     final text = StringBuffer()
       ..writeln('⛽ $name')
       ..writeln()
-      ..writeln('$fuelLabel  ${formatted}원/L')
+      ..writeln('$fuelLabel  $formatted원/L')
       ..writeln(address)
       ..writeln()
       ..writeln('지도에서 보기')

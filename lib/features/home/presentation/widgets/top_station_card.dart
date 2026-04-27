@@ -54,7 +54,10 @@ class TopStationCard extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              _Badge(label: '최저가', color: AppColors.accent),
+                              const _Badge(
+                                label: '최저가',
+                                color: AppColors.accent,
+                              ),
                               const SizedBox(width: AppSpacing.sm),
                               if (station.isSelfService)
                                 const _Badge(

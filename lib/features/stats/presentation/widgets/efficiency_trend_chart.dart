@@ -32,7 +32,7 @@ class _EfficiencyPainter extends CustomPainter {
     const valueHeight = 18.0;
     const padX = 18.0;
     final chartHeight = size.height - labelHeight - valueHeight;
-    final chartTop = valueHeight;
+    const chartTop = valueHeight;
 
     final values = buckets.map((b) => b.efficiency).toList();
     final nums = values.whereType<double>().toList();

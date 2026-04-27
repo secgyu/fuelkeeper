@@ -17,11 +17,11 @@ class DetailSkeleton extends StatelessWidget {
         AppSpacing.xxl,
       ),
       children: [
-        _SkeletonCard(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+        const _SkeletonCard(
+          padding: EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Skeleton(width: 80, height: 12),
               SizedBox(height: AppSpacing.sm),
               Skeleton(width: 200, height: 22),
@@ -33,8 +33,8 @@ class DetailSkeleton extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.base),
-        Row(
-          children: const [
+        const Row(
+          children: [
             Expanded(child: Skeleton(height: 44, radius: 10)),
             SizedBox(width: AppSpacing.md),
             Expanded(flex: 2, child: Skeleton(height: 44, radius: 10)),
@@ -60,11 +60,11 @@ class DetailSkeleton extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _SkeletonCard(
-          padding: const EdgeInsets.all(AppSpacing.base),
+        const _SkeletonCard(
+          padding: EdgeInsets.all(AppSpacing.base),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Skeleton(width: 100, height: 12),
               SizedBox(height: AppSpacing.base),
               Skeleton(height: 80, radius: 8),

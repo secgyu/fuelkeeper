@@ -99,8 +99,8 @@ class _ChartCardSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Skeleton(width: 100, height: 14),
               Spacer(),
               Skeleton(width: 60, height: 10),
