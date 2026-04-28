@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
-import 'package:fuelkeeper/features/onboarding/application/onboarding_providers.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -33,14 +33,24 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   Future<void> _bootstrap() async {
-    final repo = ref.read(onboardingRepositoryProvider);
-    final results = await Future.wait([
+    // 스플래시 최소 노출 시간을 보장하면서 위치 권한을 함께 처리한다.
+    await Future.wait<void>([
       Future.delayed(const Duration(milliseconds: 1100)),
-      repo.isCompleted(),
+      _ensureLocationPermission(),
     ]);
     if (!mounted) return;
-    final completed = results[1] as bool;
-    context.go(completed ? AppRoutes.home : AppRoutes.permission);
+    context.go(AppRoutes.home);
+  }
+
+  Future<void> _ensureLocationPermission() async {
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+    } catch (_) {
+      // 권한 거부/오류는 무시한다. 홈에서 위치를 사용할 때 다시 안내한다.
+    }
   }
 
   @override

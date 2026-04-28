@@ -4,7 +4,6 @@ import 'package:fuelkeeper/features/favorites/presentation/pages/favorites_page.
 import 'package:fuelkeeper/features/home/presentation/pages/home_page.dart';
 import 'package:fuelkeeper/features/logs/presentation/pages/logs_page.dart';
 import 'package:fuelkeeper/features/map/presentation/pages/map_page.dart';
-import 'package:fuelkeeper/features/onboarding/presentation/pages/permission_page.dart';
 import 'package:fuelkeeper/features/settings/presentation/pages/settings_page.dart';
 import 'package:fuelkeeper/features/shell/presentation/main_shell.dart';
 import 'package:fuelkeeper/features/splash/presentation/pages/splash_page.dart';
@@ -15,7 +14,6 @@ class AppRoutes {
   AppRoutes._();
 
   static const splash = '/splash';
-  static const permission = '/permission';
 
   static const home = '/home';
   static const map = '/map';
@@ -36,11 +34,6 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.splash,
       pageBuilder: (context, state) =>
           const NoTransitionPage(child: SplashPage()),
-    ),
-    GoRoute(
-      path: AppRoutes.permission,
-      pageBuilder: (context, state) =>
-          const NoTransitionPage(child: PermissionPage()),
     ),
     GoRoute(
       path: AppRoutes.settings,

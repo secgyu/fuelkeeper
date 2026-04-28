@@ -1,6 +1,0 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fuelkeeper/features/onboarding/data/onboarding_repository.dart';
-
-final onboardingRepositoryProvider = Provider<OnboardingRepository>(
-  (ref) => OnboardingRepository(),
-);
