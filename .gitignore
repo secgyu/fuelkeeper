@@ -45,9 +45,11 @@ app.*.map.json
 /android/app/release
 
 # Secrets / API keys (never commit)
-lib/app/config/naver_map_config.dart
-lib/app/config/opinet_config.dart
-lib/app/config/kakao_config.dart
+# 키는 빌드 인자로 주입한다. 사용 예:
+#   flutter run --dart-define-from-file=dart_defines.json
+# config 파일들(lib/app/config/*.dart)은 String.fromEnvironment만 호출하므로
+# 키가 포함되지 않아 안전하게 커밋된다.
+dart_defines.json
 
 # Personal notes
 todo.md

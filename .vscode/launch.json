@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FuelKeeper · debug",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": ["--dart-define-from-file=dart_defines.json"]
+    },
+    {
+      "name": "FuelKeeper · profile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "toolArgs": ["--dart-define-from-file=dart_defines.json"]
+    },
+    {
+      "name": "FuelKeeper · release",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "toolArgs": ["--dart-define-from-file=dart_defines.json"]
+    }
+  ]
+}

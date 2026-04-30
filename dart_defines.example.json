@@ -1,0 +1,6 @@
+{
+  "_comment": "이 파일을 dart_defines.json으로 복사한 뒤 실제 키 값을 채워넣으세요. dart_defines.json은 .gitignore에 등록되어 있습니다.",
+  "OPINET_API_KEY": "여기에_Opinet_API_키",
+  "NAVER_MAP_CLIENT_ID": "여기에_NAVER_Maps_Client_ID",
+  "KAKAO_REST_API_KEY": "여기에_Kakao_REST_API_키"
+}
