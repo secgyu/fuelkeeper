@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
+import 'package:fuelkeeper/core/utils/coordinate_converter.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
@@ -30,6 +34,34 @@ class _MapPageState extends ConsumerState<MapPage> {
 
   NaverMapController? _controller;
   Station? _selected;
+  NOverlayImage? _myLocationIcon;
+  StreamSubscription<CompassEvent>? _compassSubscription;
+  LatLng? _lastLocation;
+  double _lastHeading = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final events = FlutterCompass.events;
+    if (events != null) {
+      _compassSubscription = events.listen(_onCompassEvent);
+    }
+  }
+
+  @override
+  void dispose() {
+    _compassSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _onCompassEvent(CompassEvent event) {
+    final heading = event.heading;
+    if (heading == null) return;
+    _lastHeading = heading;
+    final controller = _controller;
+    if (controller == null || _lastLocation == null) return;
+    controller.getLocationOverlay().setBearing(heading);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +80,17 @@ class _MapPageState extends ConsumerState<MapPage> {
         if (controller == null) return;
         await controller.clearOverlays();
         await _addMarkers(controller, stations, fuelType);
+        locationAsync.whenData((loc) {
+          _updateMyLocationOverlay(controller, loc);
+        });
+      });
+    });
+
+    ref.listen<AsyncValue<LatLng>>(currentLocationProvider, (prev, next) {
+      next.whenData((loc) {
+        final controller = _controller;
+        if (controller == null) return;
+        _updateMyLocationOverlay(controller, loc);
       });
     });
 
@@ -79,7 +122,12 @@ class _MapPageState extends ConsumerState<MapPage> {
             ),
             onMapReady: (controller) async {
               _controller = controller;
+              await _ensureMyLocationIcon();
+              if (!mounted) return;
               await _addMarkers(controller, stations, fuelType);
+              locationAsync.whenData((loc) {
+                _updateMyLocationOverlay(controller, loc);
+              });
             },
           ),
           SafeArea(
@@ -126,9 +174,8 @@ class _MapPageState extends ConsumerState<MapPage> {
                 station: _selected!,
                 fuelType: fuelType,
                 onClose: () => setState(() => _selected = null),
-                onTap: () => context.push(
-                  AppRoutes.stationDetail(_selected!.id),
-                ),
+                onTap: () =>
+                    context.push(AppRoutes.stationDetail(_selected!.id)),
               ),
             ),
           Positioned(
@@ -166,30 +213,88 @@ class _MapPageState extends ConsumerState<MapPage> {
     for (final s in stations) {
       final price = s.priceOf(fuelType);
       if (price == null) continue;
-      final marker = NMarker(
-        id: s.id,
-        position: NLatLng(s.latitude, s.longitude),
-        caption: NOverlayCaption(
-          text: '${(price / 1).round()}원',
-          textSize: 11,
-          color: Colors.white,
-          haloColor: s.brand.color,
-        ),
-        size: const NSize(28, 36),
-      )..setOnTapListener((_) {
-          setState(() => _selected = s);
-          controller.updateCamera(
-            NCameraUpdate.scrollAndZoomTo(
-              target: NLatLng(s.latitude, s.longitude),
-              zoom: _selectedZoom,
+      final marker =
+          NMarker(
+            id: s.id,
+            position: NLatLng(s.latitude, s.longitude),
+            caption: NOverlayCaption(
+              text: '${(price / 1).round()}원',
+              textSize: 11,
+              color: Colors.white,
+              haloColor: s.brand.color,
             ),
-          );
-          return true;
-        });
+            size: const NSize(28, 36),
+          )..setOnTapListener((_) {
+            setState(() => _selected = s);
+            controller.updateCamera(
+              NCameraUpdate.scrollAndZoomTo(
+                target: NLatLng(s.latitude, s.longitude),
+                zoom: _selectedZoom,
+              ),
+            );
+            return true;
+          });
       markers.add(marker);
     }
     if (markers.isNotEmpty) {
       await controller.addOverlayAll(markers);
     }
+  }
+
+  void _updateMyLocationOverlay(
+    NaverMapController controller,
+    LatLng location,
+  ) {
+    _lastLocation = location;
+    final overlay = controller.getLocationOverlay();
+    overlay.setPosition(NLatLng(location.latitude, location.longitude));
+    overlay.setIsVisible(true);
+    overlay.setCircleColor(AppColors.brandPrimary.withValues(alpha: 0.18));
+    overlay.setCircleOutlineColor(
+      AppColors.brandPrimary.withValues(alpha: 0.5),
+    );
+    overlay.setCircleOutlineWidth(1);
+    overlay.setCircleRadius(40);
+    overlay.setBearing(_lastHeading);
+    final icon = _myLocationIcon;
+    if (icon != null) {
+      overlay.setIcon(icon);
+      overlay.setIconSize(const Size(36, 36));
+    }
+  }
+
+  Future<void> _ensureMyLocationIcon() async {
+    if (_myLocationIcon != null) return;
+    if (!mounted) return;
+    _myLocationIcon = await NOverlayImage.fromWidget(
+      context: context,
+      size: const Size(36, 36),
+      widget: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(3),
+        child: Container(
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.brandPrimary,
+          ),
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.navigation_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -36,9 +36,7 @@ final currentLocationProvider = FutureProvider<LatLng>((ref) async {
       if (_isWithinKorea(position.latitude, position.longitude)) {
         return LatLng(position.latitude, position.longitude);
       }
-    } catch (_) {
-      // 새 fix를 못 받으면 마지막 알려진 위치로 폴백
-    }
+    } catch (_) {}
 
     final last = await Geolocator.getLastKnownPosition();
     if (last != null && _isWithinKorea(last.latitude, last.longitude)) {
@@ -57,15 +55,12 @@ final kakaoLocalRepositoryProvider = Provider<KakaoLocalRepository>(
 
 final currentAddressProvider = FutureProvider<String>((ref) async {
   final location = await ref.watch(currentLocationProvider.future);
-
-  // 1순위: 카카오 Local API (한국 행정구역 데이터가 가장 정확)
   final kakao = ref.read(kakaoLocalRepositoryProvider);
   final kakaoResult = await kakao.reverseGeocode(location);
   if (kakaoResult != null && kakaoResult.isNotEmpty) {
     return kakaoResult;
   }
 
-  // 2순위: 시스템 reverse geocoding (네트워크 장애·API 한도 초과 등 대비)
   try {
     await setLocaleIdentifier('ko_KR');
     final placemarks = await placemarkFromCoordinates(
@@ -76,22 +71,15 @@ final currentAddressProvider = FutureProvider<String>((ref) async {
       final formatted = _formatKoreanAddress(placemarks.first);
       if (formatted != null) return formatted;
     }
-  } catch (_) {
-    // 무시하고 폴백 주소 사용
-  }
+  } catch (_) {}
 
   return _fallbackAddress;
 });
 
-// 광역단위(시·도)는 표시에서 제외한다. (예: 부산광역시, 경기도, 세종특별자치시)
 final RegExp _provincePattern = RegExp(r'(특별시|광역시|특별자치시|특별자치도|도)$');
-// 시·군·구 단위 (예: 남구, 강남구, 강화군, 성남시)
 final RegExp _districtPattern = RegExp(r'[가-힣A-Za-z0-9]+(시|군|구)$');
-// 읍·면·동·리 단위 (예: 대연동, 길상면, 조치원읍)
 final RegExp _neighborhoodPattern = RegExp(r'[가-힣A-Za-z0-9]+(읍|면|동|리)$');
 
-/// 시스템 [Placemark]를 한국식 행정구역 표기로 변환하는 폴백 포매터.
-/// 카카오 응답이 실패한 경우에만 사용된다.
 String? _formatKoreanAddress(Placemark p) {
   final candidates = <String>{
     for (final v in [
