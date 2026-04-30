@@ -24,13 +24,15 @@ class FuelLogAdapter extends TypeAdapter<FuelLog> {
       liters: fields[7] as double,
       odometerKm: fields[8] as int,
       memo: fields[9] as String? ?? '',
+      // 차량 ID는 후방 호환을 위해 nullable. 차량 도입 이전 로그는 null로 읽힌다.
+      vehicleId: fields[10] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, FuelLog obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,6 +52,8 @@ class FuelLogAdapter extends TypeAdapter<FuelLog> {
       ..writeByte(8)
       ..write(obj.odometerKm)
       ..writeByte(9)
-      ..write(obj.memo);
+      ..write(obj.memo)
+      ..writeByte(10)
+      ..write(obj.vehicleId);
   }
 }

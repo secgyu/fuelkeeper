@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/features/settings/presentation/widgets/data_clear_tiles.dart';
+import 'package:fuelkeeper/features/settings/presentation/widgets/data_export_tiles.dart';
 import 'package:fuelkeeper/features/settings/presentation/widgets/fuel_type_setting_tile.dart';
+import 'package:fuelkeeper/features/settings/presentation/widgets/notification_setting_tile.dart';
 import 'package:fuelkeeper/features/settings/presentation/widgets/settings_primitives.dart';
 import 'package:fuelkeeper/features/settings/presentation/widgets/theme_mode_setting_tile.dart';
+import 'package:fuelkeeper/features/settings/presentation/widgets/vehicle_setting_tile.dart';
 import 'package:go_router/go_router.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -28,7 +31,17 @@ class SettingsPage extends ConsumerWidget {
             const SettingsDivider(),
             const LocationRefreshTile(),
             const SizedBox(height: AppSpacing.lg),
+            const SettingsSectionHeader('차량'),
+            const VehicleSettingTile(),
+            const SizedBox(height: AppSpacing.lg),
+            const SettingsSectionHeader('알림'),
+            const NotificationSettingTile(),
+            const SizedBox(height: AppSpacing.lg),
             const SettingsSectionHeader('데이터 관리'),
+            const FuelLogsExportTile(),
+            const SettingsDivider(),
+            const FuelLogsImportTile(),
+            const SettingsDivider(),
             const FavoritesClearTile(),
             const SettingsDivider(),
             const FuelLogsClearTile(),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
-import 'package:fuelkeeper/core/utils/external_launcher.dart';
+import 'package:fuelkeeper/core/utils/share_image.dart';
 import 'package:fuelkeeper/core/widgets/empty_view.dart';
 import 'package:fuelkeeper/core/widgets/error_view.dart';
 import 'package:fuelkeeper/features/favorites/presentation/widgets/favorite_button.dart';
@@ -13,6 +13,8 @@ import 'package:fuelkeeper/features/station_detail/presentation/widgets/detail_s
 import 'package:fuelkeeper/features/station_detail/presentation/widgets/fuel_price_table.dart';
 import 'package:fuelkeeper/features/station_detail/presentation/widgets/header_card.dart';
 import 'package:fuelkeeper/features/station_detail/presentation/widgets/info_section.dart';
+import 'package:fuelkeeper/features/station_detail/presentation/widgets/price_history_chart.dart';
+import 'package:fuelkeeper/features/station_detail/presentation/widgets/share_card.dart';
 
 class StationDetailPage extends ConsumerWidget {
   const StationDetailPage({super.key, required this.stationId});
@@ -38,15 +40,25 @@ class StationDetailPage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined),
-            tooltip: '공유',
+            tooltip: '카드 이미지 공유',
             onPressed: canShare
-                ? () => ExternalLauncher.shareStation(
+                ? () {
+                    final price = loadedStation.priceOf(fuelType)!;
+                    final delta = national != null ? price - national : null;
+                    ShareImage.capture(
                       context,
-                      name: loadedStation.name,
-                      address: loadedStation.address,
-                      fuelLabel: fuelType.label,
-                      price: loadedStation.priceOf(fuelType)!,
-                    )
+                      widget: StationShareCard(
+                        station: loadedStation,
+                        fuelType: fuelType,
+                        price: price,
+                        delta: delta,
+                      ),
+                      fileNamePrefix: 'fuelkeeper_${loadedStation.id}',
+                      subject: '${loadedStation.name} ${fuelType.label} 가격',
+                      text: '${loadedStation.name} · ${fuelType.label} '
+                          '$price원/L',
+                    );
+                  }
                 : null,
           ),
           Padding(
@@ -117,6 +129,8 @@ class _DetailBody extends StatelessWidget {
         ActionRow(station: station),
         const SizedBox(height: AppSpacing.lg),
         FuelPriceTable(station: station, currentFuel: fuelType),
+        const SizedBox(height: AppSpacing.lg),
+        PriceHistoryChart(stationId: station.id, fuelType: fuelType),
         const SizedBox(height: AppSpacing.lg),
         InfoSection(station: station),
       ],

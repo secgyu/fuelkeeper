@@ -14,6 +14,14 @@ import 'package:fuelkeeper/core/lifecycle/app_lifecycle_observer.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_adapter.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_repository.dart';
 import 'package:fuelkeeper/features/logs/domain/fuel_log.dart';
+import 'package:fuelkeeper/features/notifications/local_notifications.dart';
+import 'package:fuelkeeper/features/notifications/notification_providers.dart';
+import 'package:fuelkeeper/features/stats/data/price_snapshot.dart';
+import 'package:fuelkeeper/features/stats/data/price_snapshot_adapter.dart';
+import 'package:fuelkeeper/features/stats/data/price_snapshot_repository.dart';
+import 'package:fuelkeeper/features/vehicles/data/vehicle_adapter.dart';
+import 'package:fuelkeeper/features/vehicles/data/vehicle_repository.dart';
+import 'package:fuelkeeper/features/vehicles/domain/vehicle.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -26,7 +34,17 @@ Future<void> main() async {
   if (!Hive.isAdapterRegistered(1)) {
     Hive.registerAdapter(FuelLogAdapter());
   }
-  await _openFuelLogBox();
+  if (!Hive.isAdapterRegistered(2)) {
+    Hive.registerAdapter(VehicleAdapter());
+  }
+  if (!Hive.isAdapterRegistered(3)) {
+    Hive.registerAdapter(PriceSnapshotAdapter());
+  }
+  await _openHiveBox<FuelLog>(HiveFuelLogRepository.boxName);
+  await _openHiveBox<Vehicle>(HiveVehicleRepository.boxName);
+  await _openHiveBox<PriceSnapshot>(HivePriceSnapshotRepository.boxName);
+
+  await LocalNotifications.instance.init();
 
   await FlutterNaverMap().init(
     clientId: NaverMapConfig.clientId,
@@ -62,17 +80,16 @@ void _assertSecretsConfigured() {
   }
 }
 
-Future<void> _openFuelLogBox() async {
-  const boxName = HiveFuelLogRepository.boxName;
+Future<void> _openHiveBox<T>(String boxName) async {
   try {
-    await Hive.openBox<FuelLog>(boxName);
+    await Hive.openBox<T>(boxName);
     return;
   } catch (e, st) {
     debugPrint('[hive] open "$boxName" failed: $e\n$st');
   }
 
   await _quarantineHiveBox(boxName);
-  await Hive.openBox<FuelLog>(boxName);
+  await Hive.openBox<T>(boxName);
 }
 
 Future<void> _quarantineHiveBox(String name) async {
@@ -100,6 +117,8 @@ class FuelKeeperApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    // 알림 ON/OFF·주기·로그 변화에 맞춰 OS 스케줄을 자동 재예약한다.
+    ref.watch(fuelReminderSchedulerProvider);
     return MaterialApp.router(
       title: 'FuelKeeper',
       debugShowCheckedModeBanner: false,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/core/network/opinet_api.dart';
@@ -8,6 +10,8 @@ import 'package:fuelkeeper/features/home/data/station_repository.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/sort_order.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
+import 'package:fuelkeeper/features/stats/application/price_snapshot_providers.dart';
+import 'package:fuelkeeper/features/stats/data/price_snapshot.dart';
 
 final opinetApiProvider = Provider<OpinetApi>((ref) => OpinetApi());
 
@@ -43,21 +47,74 @@ final stationsProvider = FutureProvider<List<Station>>((ref) async {
   // 캐시 키에도 radius가 포함돼 있어 이전 반경 결과는 그대로 캐시 유지된다.
   final radius = ref.watch(searchRadiusProvider);
   final location = await ref.watch(currentLocationProvider.future);
-  return repo.fetchNearby(
+  final stations = await repo.fetchNearby(
     fuelType: fuelType,
     latitude: location.latitude,
     longitude: location.longitude,
     radiusMeters: radius,
   );
+
+  // 가격 시계열 그래프를 위해 오늘 자정 기준으로 일별 스냅샷을 누적한다.
+  // 같은 날 여러 번 갱신돼도 같은 키로 덮어쓰여 1일 1건만 남는다.
+  unawaited(_recordPriceSnapshots(ref, stations, fuelType));
+
+  return stations;
 });
+
+Future<void> _recordPriceSnapshots(
+  Ref ref,
+  List<Station> stations,
+  FuelType fuelType,
+) async {
+  try {
+    final repo = await ref.read(priceSnapshotRepositoryProvider.future);
+    final today = DateTime.now();
+    final normalized = DateTime(today.year, today.month, today.day);
+    final snapshots = <PriceSnapshot>[];
+    for (final s in stations) {
+      final price = s.priceOf(fuelType);
+      if (price == null) continue;
+      snapshots.add(PriceSnapshot(
+        stationId: s.id,
+        fuelType: fuelType,
+        date: normalized,
+        price: price,
+      ));
+    }
+    if (snapshots.isEmpty) return;
+    await repo.upsertAll(snapshots);
+  } catch (_) {
+    // 스냅샷 저장 실패는 사용자 흐름을 막지 않는다.
+  }
+}
 
 final stationByIdProvider = FutureProvider.family<Station?, String>((
   ref,
   id,
 ) async {
   final repo = ref.watch(stationRepositoryProvider);
-  return repo.fetchById(id);
+  final station = await repo.fetchById(id);
+  if (station != null && station.prices.isNotEmpty) {
+    // 상세 진입 시점에 주유소가 가진 모든 연료 가격을 스냅샷한다.
+    unawaited(_recordDetailSnapshot(ref, station));
+  }
+  return station;
 });
+
+Future<void> _recordDetailSnapshot(Ref ref, Station station) async {
+  try {
+    final repo = await ref.read(priceSnapshotRepositoryProvider.future);
+    final today = DateTime.now();
+    final normalized = DateTime(today.year, today.month, today.day);
+    final snapshots = station.prices.entries.map((e) => PriceSnapshot(
+          stationId: station.id,
+          fuelType: e.key,
+          date: normalized,
+          price: e.value,
+        ));
+    await repo.upsertAll(snapshots);
+  } catch (_) {}
+}
 
 final filteredStationsProvider = Provider<AsyncValue<List<Station>>>((ref) {
   final asyncStations = ref.watch(stationsProvider);

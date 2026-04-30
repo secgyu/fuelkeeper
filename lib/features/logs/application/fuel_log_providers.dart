@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_repository.dart';
 import 'package:fuelkeeper/features/logs/domain/fuel_log.dart';
+import 'package:fuelkeeper/features/vehicles/application/vehicle_providers.dart';
 import 'package:hive/hive.dart';
 
 final fuelLogBoxProvider = FutureProvider<Box<FuelLog>>((ref) async {
@@ -16,9 +17,26 @@ final fuelLogRepositoryProvider = FutureProvider<FuelLogRepository>((
   return HiveFuelLogRepository(box);
 });
 
-final fuelLogsProvider = StreamProvider<List<FuelLog>>((ref) async* {
+/// 모든 주유 로그(필터 없음). 차량 무관하게 전체 기록을 조회할 때 사용.
+final allFuelLogsProvider = StreamProvider<List<FuelLog>>((ref) async* {
   final repo = await ref.watch(fuelLogRepositoryProvider.future);
   yield* repo.watch();
+});
+
+/// 활성 차량 기준으로 필터링된 주유 로그.
+///
+/// 활성 차량이 없거나 차량 도입 이전 로그(vehicleId == null)는
+/// "모든 차량" 묶음으로 함께 보여 사용자 경험을 단순화한다.
+final fuelLogsProvider = Provider<AsyncValue<List<FuelLog>>>((ref) {
+  final asyncAll = ref.watch(allFuelLogsProvider);
+  final activeId = ref.watch(activeVehicleIdProvider);
+
+  return asyncAll.whenData((all) {
+    if (activeId == null) return all;
+    return all
+        .where((l) => l.vehicleId == null || l.vehicleId == activeId)
+        .toList(growable: false);
+  });
 });
 
 class FuelLogActions {

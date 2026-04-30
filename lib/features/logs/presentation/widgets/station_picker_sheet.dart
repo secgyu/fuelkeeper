@@ -7,9 +7,16 @@ import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 
 class StationPickerSheet extends StatelessWidget {
-  const StationPickerSheet({super.key, required this.stations});
+  const StationPickerSheet({
+    super.key,
+    required this.stations,
+    this.recommendedId,
+  });
 
   final List<Station> stations;
+
+  /// 가장 가까운 주유소 등 사용자에게 강조해서 보여줄 항목의 id.
+  final String? recommendedId;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +57,7 @@ class StationPickerSheet extends StatelessWidget {
                   itemCount: stations.length,
                   itemBuilder: (context, i) {
                     final s = stations[i];
+                    final isRecommended = s.id == recommendedId;
                     return ListTile(
                       onTap: () => Navigator.pop(context, s),
                       leading: Container(
@@ -61,13 +69,43 @@ class StationPickerSheet extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                       ),
-                      title: Text(
-                        s.name,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.textPrimary,
-                        ),
+                      title: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              s.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: context.colors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (isRecommended) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: context.colors.primary,
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.full),
+                              ),
+                              child: Text(
+                                '추천',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: context.colors.bgPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       subtitle: Text(
                         '${s.brand.label} · ${Formatters.km(s.distanceKm)}',

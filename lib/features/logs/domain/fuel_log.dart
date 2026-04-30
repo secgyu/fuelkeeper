@@ -13,6 +13,7 @@ class FuelLog {
     required this.liters,
     required this.odometerKm,
     this.memo = '',
+    this.vehicleId,
   });
 
   final String id;
@@ -25,6 +26,11 @@ class FuelLog {
   final double liters;
   final int odometerKm;
   final String memo;
+
+  /// 어떤 차량으로 주유한 기록인지. 다중 차량 지원을 위해 추가됐다.
+  /// 차량 도입 이전에 작성된 로그는 null이며, 통계에서 "전체" 또는
+  /// 사용자가 명시적으로 매칭한 차량 기준으로 다뤄진다.
+  final String? vehicleId;
 
   int get totalCost => (pricePerLiter * liters).round();
 
@@ -39,6 +45,7 @@ class FuelLog {
     double? liters,
     int? odometerKm,
     String? memo,
+    String? vehicleId,
   }) {
     return FuelLog(
       id: id ?? this.id,
@@ -51,6 +58,7 @@ class FuelLog {
       liters: liters ?? this.liters,
       odometerKm: odometerKm ?? this.odometerKm,
       memo: memo ?? this.memo,
+      vehicleId: vehicleId ?? this.vehicleId,
     );
   }
 }

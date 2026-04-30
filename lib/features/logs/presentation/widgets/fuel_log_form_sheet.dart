@@ -11,6 +11,7 @@ import 'package:fuelkeeper/features/logs/application/fuel_log_providers.dart';
 import 'package:fuelkeeper/features/logs/domain/fuel_log.dart';
 import 'package:fuelkeeper/features/logs/presentation/widgets/fuel_log_form_fields.dart';
 import 'package:fuelkeeper/features/logs/presentation/widgets/station_picker_sheet.dart';
+import 'package:fuelkeeper/features/vehicles/application/vehicle_providers.dart';
 import 'package:uuid/uuid.dart';
 
 Future<void> showFuelLogFormSheet(BuildContext context) {
@@ -37,6 +38,15 @@ class _FuelLogFormSheetState extends ConsumerState<_FuelLogFormSheet> {
   final _litersCtrl = TextEditingController();
   final _odometerCtrl = TextEditingController();
   bool _saving = false;
+  bool _autoMatched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 시트가 열리는 순간 GPS 기준 가장 가까운 주유소를 자동 추천한다.
+    // 사용자가 다른 주유소를 직접 선택하면 _autoMatched는 자연스럽게 의미가 없어진다.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _autoMatchNearest());
+  }
 
   @override
   void dispose() {
@@ -44,6 +54,20 @@ class _FuelLogFormSheetState extends ConsumerState<_FuelLogFormSheet> {
     _litersCtrl.dispose();
     _odometerCtrl.dispose();
     super.dispose();
+  }
+
+  void _autoMatchNearest() {
+    if (_station != null) return;
+    final stations = ref.read(stationsProvider).value ?? const [];
+    if (stations.isEmpty) return;
+    final sorted = [...stations]
+      ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+    final nearest = sorted.first;
+    setState(() {
+      _station = nearest;
+      _autoMatched = true;
+      _priceCtrl.text = nearest.priceOf(_fuelType)?.toString() ?? '';
+    });
   }
 
   int get _price => int.tryParse(_priceCtrl.text.replaceAll(',', '')) ?? 0;
@@ -57,15 +81,21 @@ class _FuelLogFormSheetState extends ConsumerState<_FuelLogFormSheet> {
 
   Future<void> _pickStation() async {
     final stations = ref.read(stationsProvider).value ?? const [];
+    final sorted = [...stations]
+      ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
     final picked = await showModalBottomSheet<Station>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => StationPickerSheet(stations: stations),
+      builder: (_) => StationPickerSheet(
+        stations: sorted,
+        recommendedId: sorted.isNotEmpty ? sorted.first.id : null,
+      ),
     );
     if (picked != null) {
       setState(() {
         _station = picked;
+        _autoMatched = false;
         _priceCtrl.text = picked.priceOf(_fuelType)?.toString() ?? '';
       });
     }
@@ -84,6 +114,7 @@ class _FuelLogFormSheetState extends ConsumerState<_FuelLogFormSheet> {
   Future<void> _save() async {
     if (!_canSave || _station == null) return;
     setState(() => _saving = true);
+    final activeVehicleId = ref.read(activeVehicleIdProvider);
     final log = FuelLog(
       id: const Uuid().v4(),
       stationId: _station!.id,
@@ -94,6 +125,7 @@ class _FuelLogFormSheetState extends ConsumerState<_FuelLogFormSheet> {
       pricePerLiter: _price,
       liters: _liters,
       odometerKm: _odometer,
+      vehicleId: activeVehicleId,
     );
     final actions = await ref.read(fuelLogActionsProvider.future);
     await actions.save(log);
@@ -146,6 +178,7 @@ class _FuelLogFormSheetState extends ConsumerState<_FuelLogFormSheet> {
                     onFuelTypeChanged: _onFuelTypeChanged,
                     onAnyFieldChanged: () => setState(() {}),
                     onSave: _save,
+                    autoMatched: _autoMatched,
                   ),
                 ),
               ],
@@ -221,6 +254,7 @@ class _FormBody extends StatelessWidget {
     required this.onFuelTypeChanged,
     required this.onAnyFieldChanged,
     required this.onSave,
+    required this.autoMatched,
   });
 
   final ScrollController scrollController;
@@ -238,6 +272,7 @@ class _FormBody extends StatelessWidget {
   final ValueChanged<FuelType> onFuelTypeChanged;
   final VoidCallback onAnyFieldChanged;
   final VoidCallback onSave;
+  final bool autoMatched;
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +280,40 @@ class _FormBody extends StatelessWidget {
       controller: scrollController,
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        const FieldLabel('주유소'),
+        Row(
+          children: [
+            const FieldLabel('주유소'),
+            if (autoMatched && station != null) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: context.colors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.my_location_rounded,
+                      size: 11,
+                      color: context.colors.primary,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      'GPS 자동 추천',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: context.colors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
         StationField(station: station, onTap: onPickStation),
         const SizedBox(height: AppSpacing.lg),
         const FieldLabel('날짜'),
