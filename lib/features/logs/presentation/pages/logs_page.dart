@@ -9,6 +9,8 @@ import 'package:fuelkeeper/features/logs/presentation/widgets/fuel_log_form_shee
 import 'package:fuelkeeper/features/logs/presentation/widgets/log_tile.dart';
 import 'package:fuelkeeper/features/logs/presentation/widgets/logs_empty_state.dart';
 import 'package:fuelkeeper/features/logs/presentation/widgets/monthly_summary_card.dart';
+import 'package:fuelkeeper/app/theme/app_radius.dart';
+import 'package:fuelkeeper/core/widgets/skeleton.dart';
 
 class LogsPage extends ConsumerWidget {
   const LogsPage({super.key});
@@ -28,8 +30,11 @@ class LogsPage extends ConsumerWidget {
         centerTitle: false,
       ),
       body: logsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('오류: $e')),
+        loading: () => const _LogsLoadingSkeleton(),
+        error: (e, _) {
+          debugPrint('[logs] load failed: $e');
+          return const Center(child: Text('주유 기록을 불러오지 못했어요'));
+        },
         data: (logs) => CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -96,6 +101,71 @@ class LogsPage extends ConsumerWidget {
       );
     });
     return widgets;
+  }
+}
+
+class _LogsLoadingSkeleton extends StatelessWidget {
+  const _LogsLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
+      children: [
+        Container(
+          height: 110,
+          decoration: BoxDecoration(
+            color: context.colors.bgSurface,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: context.colors.borderHair),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.base),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Skeleton(width: 80, height: 12),
+              SizedBox(height: 10),
+              Skeleton(width: 130, height: 26),
+              Spacer(),
+              Skeleton(width: 220, height: 12),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        for (var i = 0; i < 4; i++) ...[
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.base),
+            decoration: BoxDecoration(
+              color: context.colors.bgSurface,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: context.colors.borderHair),
+            ),
+            child: const Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Skeleton(width: 100, height: 14),
+                      SizedBox(height: 6),
+                      Skeleton(width: 70, height: 12),
+                    ],
+                  ),
+                ),
+                Skeleton(width: 80, height: 18),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+      ],
+    );
   }
 }
 

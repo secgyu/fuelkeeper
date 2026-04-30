@@ -4,10 +4,13 @@ import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
+import 'package:fuelkeeper/core/widgets/error_view.dart';
+import 'package:fuelkeeper/core/widgets/skeleton.dart';
 import 'package:fuelkeeper/features/favorites/application/favorites_providers.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/station_list_tile.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fuelkeeper/app/theme/app_radius.dart';
 
 class FavoritesPage extends ConsumerWidget {
   const FavoritesPage({super.key});
@@ -22,7 +25,15 @@ class FavoritesPage extends ConsumerWidget {
       body: SafeArea(
         child: asyncFavStations.when(
           loading: () => const _Loading(),
-          error: (_, _) => const Center(child: Text('즐겨찾기를 불러오지 못했어요')),
+          error: (e, _) {
+            debugPrint('[favorites] load failed: $e');
+            return ErrorView(
+              title: '즐겨찾기를 불러오지 못했어요',
+              message: '인터넷 연결을 확인하고\n잠시 후 다시 시도해주세요.',
+              icon: Icons.cloud_off_rounded,
+              onRetry: () => ref.invalidate(favoriteStationsProvider),
+            );
+          },
           data: (favStations) {
             if (favStations.isEmpty) return const _EmptyState();
 
@@ -72,11 +83,48 @@ class _Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2.4),
+    return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.base,
+        AppSpacing.sm,
+        AppSpacing.base,
+        AppSpacing.xxl,
+      ),
+      itemCount: 5,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (context, _) => Container(
+        padding: const EdgeInsets.all(AppSpacing.base),
+        decoration: BoxDecoration(
+          color: context.colors.bgSurface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: context.colors.borderHair),
+        ),
+        child: const Row(
+          children: [
+            Skeleton(width: 24, height: 18),
+            SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Skeleton(width: 140, height: 14),
+                  SizedBox(height: 6),
+                  Skeleton(width: 100, height: 12),
+                ],
+              ),
+            ),
+            SizedBox(width: AppSpacing.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Skeleton(width: 80, height: 18),
+                SizedBox(height: 6),
+                Skeleton(width: 50, height: 12),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

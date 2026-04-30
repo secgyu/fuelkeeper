@@ -3,6 +3,7 @@ import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/core/network/opinet_api.dart';
 import 'package:fuelkeeper/features/home/data/opinet_codes.dart';
 import 'package:fuelkeeper/features/home/data/opinet_station_repository.dart';
+import 'package:fuelkeeper/features/home/application/search_radius_provider.dart';
 import 'package:fuelkeeper/features/home/data/station_repository.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/sort_order.dart';
@@ -38,11 +39,15 @@ final selectedSortOrderProvider =
 final stationsProvider = FutureProvider<List<Station>>((ref) async {
   final repo = ref.watch(stationRepositoryProvider);
   final fuelType = ref.watch(selectedFuelTypeProvider);
+  // 반경이 바뀌면 stationsProvider가 재실행되도록 watch 한다.
+  // 캐시 키에도 radius가 포함돼 있어 이전 반경 결과는 그대로 캐시 유지된다.
+  final radius = ref.watch(searchRadiusProvider);
   final location = await ref.watch(currentLocationProvider.future);
   return repo.fetchNearby(
     fuelType: fuelType,
     latitude: location.latitude,
     longitude: location.longitude,
+    radiusMeters: radius,
   );
 });
 

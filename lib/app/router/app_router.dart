@@ -7,6 +7,7 @@ import 'package:fuelkeeper/features/legal/presentation/pages/privacy_policy_page
 import 'package:fuelkeeper/features/legal/presentation/pages/terms_of_service_page.dart';
 import 'package:fuelkeeper/features/logs/presentation/pages/logs_page.dart';
 import 'package:fuelkeeper/features/map/presentation/pages/map_page.dart';
+import 'package:fuelkeeper/features/search/presentation/pages/search_page.dart';
 import 'package:fuelkeeper/features/settings/presentation/pages/settings_page.dart';
 import 'package:fuelkeeper/features/shell/presentation/main_shell.dart';
 import 'package:fuelkeeper/features/splash/presentation/pages/splash_page.dart';
@@ -25,6 +26,7 @@ class AppRoutes {
   static const stats = '/stats';
 
   static const settings = '/settings';
+  static const search = '/search';
   static const station = '/station';
 
   static const privacyPolicy = '/legal/privacy';
@@ -45,6 +47,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.settings,
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.search,
+      builder: (context, state) => const SearchPage(),
     ),
     GoRoute(
       path: AppRoutes.privacyPolicy,

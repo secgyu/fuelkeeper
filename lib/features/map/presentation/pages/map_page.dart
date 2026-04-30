@@ -120,6 +120,21 @@ class _MapPageState extends ConsumerState<MapPage> {
               logoAlign: NLogoAlign.leftBottom,
               logoMargin: const EdgeInsets.only(left: 12, bottom: 24),
             ),
+            // 줌 13 이하(시·구 단위)에서는 인접한 주유소 마커들을 묶어 보여
+            // 도심에서의 마커 밀집을 완화한다. 줌 14 이상에서는 개별 가격 마커.
+            clusterOptions: NaverMapClusteringOptions(
+              enableZoomRange: const NInclusiveRange(0, 13),
+              animationDuration: const Duration(milliseconds: 250),
+              clusterMarkerBuilder: (info, marker) {
+                marker.setSize(const NSize(40, 40));
+                marker.setCaption(NOverlayCaption(
+                  text: info.size.toString(),
+                  textSize: 12,
+                  color: Colors.white,
+                  haloColor: context.colors.primary,
+                ));
+              },
+            ),
             onMapReady: (controller) async {
               _controller = controller;
               await _ensureMyLocationIcon();
@@ -209,14 +224,14 @@ class _MapPageState extends ConsumerState<MapPage> {
     List<Station> stations,
     FuelType fuelType,
   ) async {
-    final markers = <NMarker>{};
+    final markers = <NClusterableMarker>{};
     for (final s in stations) {
       final price = s.priceOf(fuelType);
       if (price == null) continue;
       if (!s.hasCoordinates) continue;
       final position = NLatLng(s.latitude!, s.longitude!);
       final marker =
-          NMarker(
+          NClusterableMarker(
             id: s.id,
             position: position,
             caption: NOverlayCaption(

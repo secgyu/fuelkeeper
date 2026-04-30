@@ -6,40 +6,97 @@ import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
+import 'package:fuelkeeper/core/location/presentation/location_override_banner.dart';
+import 'package:fuelkeeper/core/location/presentation/location_permission_dialog.dart';
 import 'package:fuelkeeper/core/location/presentation/location_status_banner.dart';
+import 'package:fuelkeeper/core/widgets/error_view.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/fuel_type_filter_row.dart';
+import 'package:fuelkeeper/features/home/presentation/widgets/home_skeleton.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/price_banner.dart';
+import 'package:fuelkeeper/features/home/presentation/widgets/radius_filter_row.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/sort_filter_row.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/station_list_tile.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/top_station_card.dart';
 import 'package:go_router/go_router.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncStations = ref.watch(filteredStationsProvider);
-    final fuelType = ref.watch(selectedFuelTypeProvider);
-    final national = ref.watch(nationalAverageProvider);
-    final asyncAddress = ref.watch(currentAddressProvider);
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
 
-    Future<void> refreshLocation() async {
+class _HomePageState extends ConsumerState<HomePage> {
+  bool _isRefreshing = false;
+
+  Future<void> _refreshLocation() async {
+    if (_isRefreshing) return;
+    setState(() => _isRefreshing = true);
+    try {
       ref.read(stationRepositoryProvider).clearCache();
       ref.invalidate(currentLocationProvider);
       ref.invalidate(currentAddressProvider);
       ref.invalidate(stationsProvider);
       ref.invalidate(nationalAveragesProvider);
       await ref.read(stationsProvider.future);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('최신 정보로 업데이트했어요'),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+    } catch (e) {
+      debugPrint('[home] refresh failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('새로고침에 실패했어요. 잠시 후 다시 시도해주세요.'),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+    } finally {
+      if (mounted) setState(() => _isRefreshing = false);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final asyncStations = ref.watch(filteredStationsProvider);
+    final fuelType = ref.watch(selectedFuelTypeProvider);
+    final national = ref.watch(nationalAverageProvider);
+    final asyncAddress = ref.watch(currentAddressProvider);
+
+    // 위치 권한이 영구 거부 또는 시스템 OFF면 세션당 한 번 다이얼로그로 강력 안내한다.
+    ref.listen(locationResultProvider, (previous, next) {
+      next.whenOrNull(
+        data: (result) {
+          final shouldShow = result.status == LocationStatus.deniedForever ||
+              result.status == LocationStatus.serviceDisabled;
+          if (!shouldShow) return;
+          if (ref.read(locationDialogShownProvider)) return;
+          ref.read(locationDialogShownProvider.notifier).markShown();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            showLocationPermissionDialog(context, status: result.status);
+          });
+        },
+      );
+    });
 
     return Scaffold(
       appBar: AppBar(
         titleSpacing: AppSpacing.base,
         title: InkWell(
-          onTap: refreshLocation,
+          onTap: _refreshLocation,
           borderRadius: BorderRadius.circular(AppRadius.xs),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xs),
@@ -61,17 +118,19 @@ class HomePage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(
-                  Icons.refresh_rounded,
-                  size: 18,
-                  color: context.colors.textSecondary,
-                ),
+                _RefreshIcon(isRefreshing: _isRefreshing),
               ],
             ),
           ),
         ),
         actions: [
           IconButton(
+            tooltip: '검색',
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () => context.push(AppRoutes.search),
+          ),
+          IconButton(
+            tooltip: '설정',
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push(AppRoutes.settings),
           ),
@@ -79,12 +138,17 @@ class HomePage extends ConsumerWidget {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: refreshLocation,
+          onRefresh: _refreshLocation,
           child: asyncStations.when(
-            loading: () => const _LoadingState(),
+            loading: () => const HomeSkeleton(),
             error: (e, st) {
               debugPrint('[home] stations load failed: $e\n$st');
-              return _ErrorState(onRetry: refreshLocation);
+              return ErrorView(
+                title: '주유소 정보를 불러오지 못했어요',
+                message: '인터넷 연결을 확인하고\n잠시 후 다시 시도해주세요.',
+                icon: Icons.cloud_off_rounded,
+                onRetry: _refreshLocation,
+              );
             },
             data: (stations) {
               if (stations.isEmpty) {
@@ -97,6 +161,7 @@ class HomePage extends ConsumerWidget {
                     AppSpacing.xxl,
                   ),
                   children: const [
+                    LocationOverrideBanner(),
                     LocationStatusBanner(),
                     PriceBanner(),
                     SizedBox(height: AppSpacing.base),
@@ -114,6 +179,54 @@ class HomePage extends ConsumerWidget {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _RefreshIcon extends StatefulWidget {
+  const _RefreshIcon({required this.isRefreshing});
+
+  final bool isRefreshing;
+
+  @override
+  State<_RefreshIcon> createState() => _RefreshIconState();
+}
+
+class _RefreshIconState extends State<_RefreshIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+
+  @override
+  void didUpdateWidget(covariant _RefreshIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isRefreshing && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (!widget.isRefreshing && _controller.isAnimating) {
+      _controller.stop();
+      _controller.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RotationTransition(
+      turns: _controller,
+      child: Icon(
+        Icons.refresh_rounded,
+        size: 18,
+        color: widget.isRefreshing
+            ? context.colors.primary
+            : context.colors.textSecondary,
       ),
     );
   }
@@ -146,18 +259,36 @@ class _StationListView extends StatelessWidget {
         AppSpacing.base,
         AppSpacing.xxl,
       ),
-      itemCount: rest.length + 5,
+      itemCount: rest.length + 7,
       separatorBuilder: (context, i) {
-        if (i == 0 || i == 1 || i == 2 || i == 3) {
+        if (i <= 5) {
           return const SizedBox(height: AppSpacing.base);
         }
         return const SizedBox(height: AppSpacing.sm);
       },
       itemBuilder: (context, i) {
-        if (i == 0) return const LocationStatusBanner();
-        if (i == 1) return const PriceBanner();
-        if (i == 2) return const FuelTypeFilterRow();
-        if (i == 3) {
+        if (i == 0) return const LocationOverrideBanner();
+        if (i == 1) return const LocationStatusBanner();
+        if (i == 2) return const PriceBanner();
+        if (i == 3) return const FuelTypeFilterRow();
+        if (i == 4) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '검색 반경',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textTertiary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              const Expanded(child: RadiusFilterRow()),
+            ],
+          );
+        }
+        if (i == 5) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -173,7 +304,7 @@ class _StationListView extends StatelessWidget {
             ],
           );
         }
-        if (i == 4) {
+        if (i == 6) {
           return TopStationCard(
             station: top,
             fuelType: fuelType,
@@ -181,30 +312,15 @@ class _StationListView extends StatelessWidget {
             onTap: () => context.push(AppRoutes.stationDetail(top.id)),
           );
         }
-        final station = rest[i - 5];
+        final station = rest[i - 7];
         return StationListTile(
-          rank: i - 3,
+          rank: i - 5,
           station: station,
           fuelType: fuelType,
           lowestPrice: lowest,
           onTap: () => context.push(AppRoutes.stationDetail(station.id)),
         );
       },
-    );
-  }
-}
-
-class _LoadingState extends StatelessWidget {
-  const _LoadingState();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: SizedBox(
-        width: 28,
-        height: 28,
-        child: CircularProgressIndicator(strokeWidth: 2.4),
-      ),
     );
   }
 }
@@ -241,43 +357,3 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.onRetry});
-
-  final Future<void> Function() onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.cloud_off_rounded,
-              size: 48,
-              color: context.colors.textTertiary,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const Text('주유소 정보를 불러오지 못했어요', style: AppTypography.h3),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              '인터넷 연결을 확인하고\n잠시 후 다시 시도해주세요.',
-              textAlign: TextAlign.center,
-              style: AppTypography.body2.copyWith(
-                color: context.colors.textTertiary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton.tonalIcon(
-              onPressed: () => onRetry(),
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('다시 시도'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

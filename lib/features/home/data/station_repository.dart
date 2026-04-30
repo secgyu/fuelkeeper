@@ -6,6 +6,7 @@ abstract class StationRepository {
     required FuelType fuelType,
     double? latitude,
     double? longitude,
+    int? radiusMeters,
   });
   Future<Station?> fetchById(String id);
 

@@ -13,7 +13,7 @@ class OpinetStationRepository implements StationRepository {
 
   final OpinetApi _api;
 
-  static const _radiusMeters = 5000;
+  static const defaultRadiusMeters = 5000;
   static const _cacheTtl = Duration(minutes: 30);
 
   final Map<String, _CacheEntry<List<Station>>> _nearbyCache = {};
@@ -24,11 +24,13 @@ class OpinetStationRepository implements StationRepository {
     required FuelType fuelType,
     double? latitude,
     double? longitude,
+    int? radiusMeters,
   }) async {
     final lat = latitude ?? kDefaultFallbackLocation.latitude;
     final lng = longitude ?? kDefaultFallbackLocation.longitude;
+    final radius = radiusMeters ?? defaultRadiusMeters;
     final cacheKey =
-        '${lat.toStringAsFixed(3)}:${lng.toStringAsFixed(3)}:$_radiusMeters:${fuelType.name}';
+        '${lat.toStringAsFixed(3)}:${lng.toStringAsFixed(3)}:$radius:${fuelType.name}';
 
     final cached = _nearbyCache[cacheKey];
     if (cached != null && !cached.isExpired) return cached.value;
@@ -37,7 +39,7 @@ class OpinetStationRepository implements StationRepository {
     final list = await _api.aroundAll(
       katecX: katec.x,
       katecY: katec.y,
-      radius: _radiusMeters,
+      radius: radius,
       prodcd: OpinetCodes.prodcdOf(fuelType),
       sort: 1,
     );
