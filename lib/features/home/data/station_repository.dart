@@ -8,4 +8,6 @@ abstract class StationRepository {
     double? longitude,
   });
   Future<Station?> fetchById(String id);
+
+  void clearCache();
 }

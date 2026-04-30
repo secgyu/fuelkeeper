@@ -9,6 +9,7 @@ import 'package:fuelkeeper/app/config/naver_map_config.dart';
 import 'package:fuelkeeper/app/config/opinet_config.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_theme.dart';
+import 'package:fuelkeeper/core/lifecycle/app_lifecycle_observer.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_adapter.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_repository.dart';
 import 'package:fuelkeeper/features/logs/domain/fuel_log.dart';
@@ -33,7 +34,11 @@ Future<void> main() async {
     },
   );
 
-  runApp(const ProviderScope(child: FuelKeeperApp()));
+  runApp(
+    const ProviderScope(
+      child: AppLifecycleObserver(child: FuelKeeperApp()),
+    ),
+  );
 }
 
 void _assertSecretsConfigured() {

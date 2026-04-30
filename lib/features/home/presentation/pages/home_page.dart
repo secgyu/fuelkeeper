@@ -6,6 +6,7 @@ import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
+import 'package:fuelkeeper/core/location/presentation/location_status_banner.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
 import 'package:fuelkeeper/features/home/presentation/widgets/fuel_type_filter_row.dart';
@@ -26,8 +27,11 @@ class HomePage extends ConsumerWidget {
     final asyncAddress = ref.watch(currentAddressProvider);
 
     Future<void> refreshLocation() async {
+      ref.read(stationRepositoryProvider).clearCache();
       ref.invalidate(currentLocationProvider);
       ref.invalidate(currentAddressProvider);
+      ref.invalidate(stationsProvider);
+      ref.invalidate(nationalAveragesProvider);
       await ref.read(stationsProvider.future);
     }
 
@@ -93,6 +97,7 @@ class HomePage extends ConsumerWidget {
                     AppSpacing.xxl,
                   ),
                   children: const [
+                    LocationStatusBanner(),
                     PriceBanner(),
                     SizedBox(height: AppSpacing.base),
                     FuelTypeFilterRow(),
@@ -141,17 +146,18 @@ class _StationListView extends StatelessWidget {
         AppSpacing.base,
         AppSpacing.xxl,
       ),
-      itemCount: rest.length + 4,
+      itemCount: rest.length + 5,
       separatorBuilder: (context, i) {
-        if (i == 0 || i == 1 || i == 2) {
+        if (i == 0 || i == 1 || i == 2 || i == 3) {
           return const SizedBox(height: AppSpacing.base);
         }
         return const SizedBox(height: AppSpacing.sm);
       },
       itemBuilder: (context, i) {
-        if (i == 0) return const PriceBanner();
-        if (i == 1) return const FuelTypeFilterRow();
-        if (i == 2) {
+        if (i == 0) return const LocationStatusBanner();
+        if (i == 1) return const PriceBanner();
+        if (i == 2) return const FuelTypeFilterRow();
+        if (i == 3) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -167,7 +173,7 @@ class _StationListView extends StatelessWidget {
             ],
           );
         }
-        if (i == 3) {
+        if (i == 4) {
           return TopStationCard(
             station: top,
             fuelType: fuelType,
@@ -175,9 +181,9 @@ class _StationListView extends StatelessWidget {
             onTap: () => context.push(AppRoutes.stationDetail(top.id)),
           );
         }
-        final station = rest[i - 4];
+        final station = rest[i - 5];
         return StationListTile(
-          rank: i - 2,
+          rank: i - 3,
           station: station,
           fuelType: fuelType,
           lowestPrice: lowest,

@@ -1,24 +1,35 @@
 import 'package:dio/dio.dart';
 import 'package:fuelkeeper/app/config/kakao_config.dart';
+import 'package:fuelkeeper/core/network/retry_interceptor.dart';
 import 'package:fuelkeeper/core/utils/coordinate_converter.dart';
 
 class KakaoLocalRepository {
-  KakaoLocalRepository({Dio? dio}) : _dio = dio ?? Dio();
+  KakaoLocalRepository({Dio? dio}) : _dio = dio ?? _defaultDio();
 
   final Dio _dio;
+
+  static Dio _defaultDio() {
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 4),
+        receiveTimeout: const Duration(seconds: 8),
+      ),
+    );
+    dio.interceptors.add(RetryInterceptor());
+    return dio;
+  }
 
   static const String _endpoint =
       'https://dapi.kakao.com/v2/local/geo/coord2regioncode.json';
 
   Future<String?> reverseGeocode(LatLng location) async {
+    if (!KakaoConfig.isConfigured) return null;
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         _endpoint,
         queryParameters: {'x': location.longitude, 'y': location.latitude},
         options: Options(
           headers: {'Authorization': 'KakaoAK ${KakaoConfig.restApiKey}'},
-          sendTimeout: const Duration(seconds: 4),
-          receiveTimeout: const Duration(seconds: 4),
         ),
       );
 

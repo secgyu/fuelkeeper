@@ -4,25 +4,60 @@ import 'package:fuelkeeper/core/utils/coordinate_converter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
-const LatLng _fallbackLocation = LatLng(37.4979, 127.0276);
-const String _fallbackAddress = '강남구 역삼동';
+enum LocationStatus {
+  granted,
+  serviceDisabled,
+  denied,
+  deniedForever,
+  unavailable,
+}
+
+class LocationResult {
+  const LocationResult({required this.location, required this.status});
+
+  final LatLng location;
+  final LocationStatus status;
+
+  bool get isFallback => status != LocationStatus.granted;
+}
+
+const LatLng kDefaultFallbackLocation = LatLng(37.5666, 126.9783);
+const String _fallbackAddress = '내 위치';
 
 bool _isWithinKorea(double lat, double lng) {
   return lat >= 33.0 && lat <= 38.7 && lng >= 124.5 && lng <= 132.0;
 }
 
 final currentLocationProvider = FutureProvider<LatLng>((ref) async {
+  final result = await ref.watch(locationResultProvider.future);
+  return result.location;
+});
+
+final locationResultProvider = FutureProvider<LocationResult>((ref) async {
   try {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return _fallbackLocation;
+    if (!serviceEnabled) {
+      return const LocationResult(
+        location: kDefaultFallbackLocation,
+        status: LocationStatus.serviceDisabled,
+      );
+    }
 
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      return _fallbackLocation;
+    if (permission == LocationPermission.deniedForever) {
+      return const LocationResult(
+        location: kDefaultFallbackLocation,
+        status: LocationStatus.deniedForever,
+      );
+    }
+    if (permission == LocationPermission.denied) {
+      return const LocationResult(
+        location: kDefaultFallbackLocation,
+        status: LocationStatus.denied,
+      );
     }
 
     try {
@@ -34,18 +69,30 @@ final currentLocationProvider = FutureProvider<LatLng>((ref) async {
         ),
       );
       if (_isWithinKorea(position.latitude, position.longitude)) {
-        return LatLng(position.latitude, position.longitude);
+        return LocationResult(
+          location: LatLng(position.latitude, position.longitude),
+          status: LocationStatus.granted,
+        );
       }
     } catch (_) {}
 
     final last = await Geolocator.getLastKnownPosition();
     if (last != null && _isWithinKorea(last.latitude, last.longitude)) {
-      return LatLng(last.latitude, last.longitude);
+      return LocationResult(
+        location: LatLng(last.latitude, last.longitude),
+        status: LocationStatus.granted,
+      );
     }
 
-    return _fallbackLocation;
+    return const LocationResult(
+      location: kDefaultFallbackLocation,
+      status: LocationStatus.unavailable,
+    );
   } catch (_) {
-    return _fallbackLocation;
+    return const LocationResult(
+      location: kDefaultFallbackLocation,
+      status: LocationStatus.unavailable,
+    );
   }
 });
 

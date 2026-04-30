@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fuelkeeper/app/config/opinet_config.dart';
+import 'package:fuelkeeper/core/error/app_exception.dart';
+import 'package:fuelkeeper/core/network/retry_interceptor.dart';
 
 class OpinetApi {
   OpinetApi({Dio? dio}) : _dio = dio ?? _defaultDio();
@@ -9,17 +11,27 @@ class OpinetApi {
   final Dio _dio;
 
   static Dio _defaultDio() {
-    return Dio(
+    final dio = Dio(
       BaseOptions(
         baseUrl: 'https://www.opinet.co.kr/api',
-        connectTimeout: const Duration(seconds: 6),
-        receiveTimeout: const Duration(seconds: 6),
-        queryParameters: {
-          'out': 'json',
-          'certkey': OpinetConfig.apiKey,
-        },
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 12),
+        queryParameters: {'out': 'json', 'certkey': OpinetConfig.apiKey},
       ),
     );
+    dio.interceptors.add(RetryInterceptor());
+    return dio;
+  }
+
+  Future<Response<dynamic>> _safeGet(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      return await _dio.get<dynamic>(path, queryParameters: queryParameters);
+    } on DioException catch (e) {
+      throw AppException.fromDio(e);
+    }
   }
 
   Future<List<dynamic>> aroundAll({
@@ -29,7 +41,7 @@ class OpinetApi {
     required String prodcd,
     int sort = 1,
   }) async {
-    final response = await _dio.get(
+    final response = await _safeGet(
       '/aroundAll.do',
       queryParameters: {
         'x': katecX.toStringAsFixed(0),
@@ -43,7 +55,7 @@ class OpinetApi {
   }
 
   Future<Map<String, dynamic>?> detailById(String id) async {
-    final response = await _dio.get(
+    final response = await _safeGet(
       '/detailById.do',
       queryParameters: {'id': id},
     );
@@ -53,12 +65,12 @@ class OpinetApi {
   }
 
   Future<List<dynamic>> avgAllPrice() async {
-    final response = await _dio.get('/avgAllPrice.do');
+    final response = await _safeGet('/avgAllPrice.do');
     return _extractOilList(response.data);
   }
 
   Future<List<dynamic>> avgSidoPrice({required String prodcd}) async {
-    final response = await _dio.get(
+    final response = await _safeGet(
       '/avgSidoPrice.do',
       queryParameters: {'prodcd': prodcd},
     );
@@ -69,7 +81,7 @@ class OpinetApi {
     required String area,
     required String prodcd,
   }) async {
-    final response = await _dio.get(
+    final response = await _safeGet(
       '/lowTop10.do',
       queryParameters: {'area': area, 'prodcd': prodcd},
     );

@@ -1,3 +1,5 @@
+import 'package:fuelkeeper/core/location/location_providers.dart'
+    show kDefaultFallbackLocation;
 import 'package:fuelkeeper/core/network/opinet_api.dart';
 import 'package:fuelkeeper/core/utils/coordinate_converter.dart';
 import 'package:fuelkeeper/features/home/data/opinet_codes.dart';
@@ -11,7 +13,6 @@ class OpinetStationRepository implements StationRepository {
 
   final OpinetApi _api;
 
-  static const _gangnamStation = LatLng(37.4979, 127.0276);
   static const _radiusMeters = 5000;
   static const _cacheTtl = Duration(minutes: 30);
 
@@ -24,8 +25,8 @@ class OpinetStationRepository implements StationRepository {
     double? latitude,
     double? longitude,
   }) async {
-    final lat = latitude ?? _gangnamStation.latitude;
-    final lng = longitude ?? _gangnamStation.longitude;
+    final lat = latitude ?? kDefaultFallbackLocation.latitude;
+    final lng = longitude ?? kDefaultFallbackLocation.longitude;
     final cacheKey =
         '${lat.toStringAsFixed(3)}:${lng.toStringAsFixed(3)}:$_radiusMeters:${fuelType.name}';
 
@@ -50,6 +51,12 @@ class OpinetStationRepository implements StationRepository {
 
     _nearbyCache[cacheKey] = _CacheEntry(stations);
     return stations;
+  }
+
+  @override
+  void clearCache() {
+    _nearbyCache.clear();
+    _detailCache.clear();
   }
 
   @override
