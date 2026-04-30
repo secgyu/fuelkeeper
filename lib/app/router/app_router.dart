@@ -2,6 +2,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:fuelkeeper/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:fuelkeeper/features/home/presentation/pages/home_page.dart';
+import 'package:fuelkeeper/features/legal/presentation/pages/data_sources_page.dart';
+import 'package:fuelkeeper/features/legal/presentation/pages/privacy_policy_page.dart';
+import 'package:fuelkeeper/features/legal/presentation/pages/terms_of_service_page.dart';
 import 'package:fuelkeeper/features/logs/presentation/pages/logs_page.dart';
 import 'package:fuelkeeper/features/map/presentation/pages/map_page.dart';
 import 'package:fuelkeeper/features/settings/presentation/pages/settings_page.dart';
@@ -24,6 +27,10 @@ class AppRoutes {
   static const settings = '/settings';
   static const station = '/station';
 
+  static const privacyPolicy = '/legal/privacy';
+  static const termsOfService = '/legal/terms';
+  static const dataSources = '/legal/data-sources';
+
   static String stationDetail(String id) => '$station/$id';
 }
 
@@ -38,6 +45,18 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.settings,
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.privacyPolicy,
+      builder: (context, state) => const PrivacyPolicyPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.termsOfService,
+      builder: (context, state) => const TermsOfServicePage(),
+    ),
+    GoRoute(
+      path: AppRoutes.dataSources,
+      builder: (context, state) => const DataSourcesPage(),
     ),
     GoRoute(
       path: '${AppRoutes.station}/:id',
