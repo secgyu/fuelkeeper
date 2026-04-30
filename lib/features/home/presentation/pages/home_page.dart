@@ -49,10 +49,7 @@ class HomePage extends ConsumerWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  asyncAddress.maybeWhen(
-                    data: (a) => a,
-                    orElse: () => '내 위치',
-                  ),
+                  asyncAddress.maybeWhen(data: (a) => a, orElse: () => '내 위치'),
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
@@ -81,7 +78,10 @@ class HomePage extends ConsumerWidget {
           onRefresh: refreshLocation,
           child: asyncStations.when(
             loading: () => const _LoadingState(),
-            error: (e, _) => _ErrorState(message: e.toString()),
+            error: (e, st) {
+              debugPrint('[home] stations load failed: $e\n$st');
+              return _ErrorState(onRetry: refreshLocation);
+            },
             data: (stations) {
               if (stations.isEmpty) {
                 return ListView(
@@ -236,19 +236,40 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
+  const _ErrorState({required this.onRetry});
 
-  final String message;
+  final Future<void> Function() onRetry;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Text(
-          '데이터를 불러오지 못했어요\n$message',
-          textAlign: TextAlign.center,
-          style: AppTypography.body2,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.cloud_off_rounded,
+              size: 48,
+              color: AppColors.textTertiary,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            const Text('주유소 정보를 불러오지 못했어요', style: AppTypography.h3),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              '인터넷 연결을 확인하고\n잠시 후 다시 시도해주세요.',
+              textAlign: TextAlign.center,
+              style: AppTypography.body2.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton.tonalIcon(
+              onPressed: () => onRetry(),
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('다시 시도'),
+            ),
+          ],
         ),
       ),
     );

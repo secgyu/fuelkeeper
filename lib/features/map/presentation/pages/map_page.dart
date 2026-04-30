@@ -213,10 +213,12 @@ class _MapPageState extends ConsumerState<MapPage> {
     for (final s in stations) {
       final price = s.priceOf(fuelType);
       if (price == null) continue;
+      if (!s.hasCoordinates) continue;
+      final position = NLatLng(s.latitude!, s.longitude!);
       final marker =
           NMarker(
             id: s.id,
-            position: NLatLng(s.latitude, s.longitude),
+            position: position,
             caption: NOverlayCaption(
               text: '${(price / 1).round()}원',
               textSize: 11,
@@ -228,7 +230,7 @@ class _MapPageState extends ConsumerState<MapPage> {
             setState(() => _selected = s);
             controller.updateCamera(
               NCameraUpdate.scrollAndZoomTo(
-                target: NLatLng(s.latitude, s.longitude),
+                target: position,
                 zoom: _selectedZoom,
               ),
             );

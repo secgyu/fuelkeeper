@@ -14,52 +14,51 @@ class FavoritesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncFavIds = ref.watch(favoriteIdsProvider);
-    final asyncStations = ref.watch(stationsProvider);
+    final asyncFavStations = ref.watch(favoriteStationsProvider);
     final fuelType = ref.watch(selectedFuelTypeProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('즐겨찾기')),
       body: SafeArea(
-        child: asyncStations.when(
+        child: asyncFavStations.when(
           loading: () => const _Loading(),
-          error: (e, _) => Center(child: Text('주유소 정보를 불러오지 못했어요\n$e')),
-          data: (allStations) {
-            return asyncFavIds.when(
-              loading: () => const _Loading(),
-              error: (e, _) => Center(child: Text('즐겨찾기를 불러오지 못했어요\n$e')),
-              data: (favIds) {
-                final favStations = allStations
-                    .where((s) => favIds.contains(s.id))
-                    .toList();
+          error: (_, _) => const Center(child: Text('즐겨찾기를 불러오지 못했어요')),
+          data: (favStations) {
+            if (favStations.isEmpty) return const _EmptyState();
 
-                if (favStations.isEmpty) return const _EmptyState();
+            final priced = favStations
+                .where((s) => s.priceOf(fuelType) != null)
+                .toList();
 
-                final lowest = favStations
-                    .map((s) => s.priceOf(fuelType)!)
-                    .reduce((a, b) => a < b ? a : b);
+            if (priced.isEmpty) {
+              return const _NoPriceForFuelState();
+            }
 
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.base,
-                    AppSpacing.sm,
-                    AppSpacing.base,
-                    AppSpacing.xxl,
-                  ),
-                  itemCount: favStations.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, i) => StationListTile(
-                    rank: i + 1,
-                    station: favStations[i],
-                    fuelType: fuelType,
-                    lowestPrice: lowest,
-                    onTap: () => context.push(
-                      AppRoutes.stationDetail(favStations[i].id),
-                    ),
-                  ),
-                );
-              },
+            final lowest = priced
+                .map((s) => s.priceOf(fuelType)!)
+                .reduce((a, b) => a < b ? a : b);
+
+            return RefreshIndicator(
+              onRefresh: () async => ref.invalidate(favoriteStationsProvider),
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.base,
+                  AppSpacing.sm,
+                  AppSpacing.base,
+                  AppSpacing.xxl,
+                ),
+                itemCount: priced.length,
+                separatorBuilder: (_, _) =>
+                    const SizedBox(height: AppSpacing.sm),
+                itemBuilder: (context, i) => StationListTile(
+                  rank: i + 1,
+                  station: priced[i],
+                  fuelType: fuelType,
+                  lowestPrice: lowest,
+                  onTap: () =>
+                      context.push(AppRoutes.stationDetail(priced[i].id)),
+                ),
+              ),
             );
           },
         ),
@@ -78,6 +77,38 @@ class _Loading extends StatelessWidget {
         width: 24,
         height: 24,
         child: CircularProgressIndicator(strokeWidth: 2.4),
+      ),
+    );
+  }
+}
+
+class _NoPriceForFuelState extends StatelessWidget {
+  const _NoPriceForFuelState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.local_gas_station_outlined,
+              size: 48,
+              color: AppColors.textTertiary,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            const Text('해당 연료 가격 정보가 없어요', style: AppTypography.h3),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              '다른 연료 종류로 변경해보세요',
+              style: AppTypography.body2.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

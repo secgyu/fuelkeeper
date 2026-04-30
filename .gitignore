@@ -48,3 +48,6 @@ app.*.map.json
 lib/app/config/naver_map_config.dart
 lib/app/config/opinet_config.dart
 lib/app/config/kakao_config.dart
+
+# Personal notes
+todo.md

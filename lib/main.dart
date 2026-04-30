@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import 'package:fuelkeeper/features/logs/data/fuel_log_adapter.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_repository.dart';
 import 'package:fuelkeeper/features/logs/domain/fuel_log.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,12 +19,7 @@ Future<void> main() async {
   if (!Hive.isAdapterRegistered(1)) {
     Hive.registerAdapter(FuelLogAdapter());
   }
-  try {
-    await Hive.openBox<FuelLog>(HiveFuelLogRepository.boxName);
-  } catch (_) {
-    await Hive.deleteBoxFromDisk(HiveFuelLogRepository.boxName);
-    await Hive.openBox<FuelLog>(HiveFuelLogRepository.boxName);
-  }
+  await _openFuelLogBox();
 
   await FlutterNaverMap().init(
     clientId: NaverMapConfig.clientId,
@@ -31,6 +29,38 @@ Future<void> main() async {
   );
 
   runApp(const ProviderScope(child: FuelKeeperApp()));
+}
+
+Future<void> _openFuelLogBox() async {
+  const boxName = HiveFuelLogRepository.boxName;
+  try {
+    await Hive.openBox<FuelLog>(boxName);
+    return;
+  } catch (e, st) {
+    debugPrint('[hive] open "$boxName" failed: $e\n$st');
+  }
+
+  await _quarantineHiveBox(boxName);
+  await Hive.openBox<FuelLog>(boxName);
+}
+
+Future<void> _quarantineHiveBox(String name) async {
+  try {
+    final dir = await getApplicationDocumentsDirectory();
+    final ts = DateTime.now().millisecondsSinceEpoch;
+
+    final hiveFile = File('${dir.path}/$name.hive');
+    if (await hiveFile.exists()) {
+      await hiveFile.rename('${dir.path}/$name.corrupted.$ts.hive');
+    }
+
+    final lockFile = File('${dir.path}/$name.lock');
+    if (await lockFile.exists()) {
+      await lockFile.delete();
+    }
+  } catch (e, st) {
+    debugPrint('[hive] quarantine "$name" failed: $e\n$st');
+  }
 }
 
 class FuelKeeperApp extends StatelessWidget {

@@ -11,6 +11,7 @@ class ActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasPhone = station.phone.trim().isNotEmpty;
+    final hasCoordinates = station.hasCoordinates;
     return Row(
       children: [
         Expanded(
@@ -26,12 +27,14 @@ class ActionRow extends StatelessWidget {
         Expanded(
           flex: 2,
           child: FilledButton.icon(
-            onPressed: () => ExternalLauncher.drivingDirections(
-              context,
-              latitude: station.latitude,
-              longitude: station.longitude,
-              name: station.name,
-            ),
+            onPressed: hasCoordinates
+                ? () => ExternalLauncher.drivingDirections(
+                    context,
+                    latitude: station.latitude!,
+                    longitude: station.longitude!,
+                    name: station.name,
+                  )
+                : null,
             icon: const Icon(Icons.directions_rounded, size: 20),
             label: const Text('길찾기'),
           ),

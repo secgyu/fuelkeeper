@@ -75,13 +75,7 @@ class OpinetStationRepository implements StationRepository {
 
     final price = _toInt(json['PRICE']);
     final distance = _toDouble(json['DISTANCE']) ?? 0.0;
-    final gisX = _toDouble(json['GIS_X_COOR']);
-    final gisY = _toDouble(json['GIS_Y_COOR']);
-
-    LatLng position = _gangnamStation;
-    if (gisX != null && gisY != null) {
-      position = CoordinateConverter.katecToWgs84(gisX, gisY);
-    }
+    final position = _coordinatesOf(json);
 
     return Station(
       id: id,
@@ -89,8 +83,8 @@ class OpinetStationRepository implements StationRepository {
       brand: brand,
       address: '',
       distanceKm: distance / 1000.0,
-      latitude: position.latitude,
-      longitude: position.longitude,
+      latitude: position?.latitude,
+      longitude: position?.longitude,
       prices: price == null ? const {} : {fuelType: price},
     );
   }
@@ -131,12 +125,7 @@ class OpinetStationRepository implements StationRepository {
       }
     }
 
-    final gisX = _toDouble(json['GIS_X_COOR']);
-    final gisY = _toDouble(json['GIS_Y_COOR']);
-    LatLng position = _gangnamStation;
-    if (gisX != null && gisY != null) {
-      position = CoordinateConverter.katecToWgs84(gisX, gisY);
-    }
+    final position = _coordinatesOf(json);
 
     return Station(
       id: id,
@@ -144,12 +133,19 @@ class OpinetStationRepository implements StationRepository {
       brand: brand,
       address: address,
       distanceKm: 0.0,
-      latitude: position.latitude,
-      longitude: position.longitude,
+      latitude: position?.latitude,
+      longitude: position?.longitude,
       phone: phone,
       amenities: amenities,
       prices: prices,
     );
+  }
+
+  LatLng? _coordinatesOf(Map<String, dynamic> json) {
+    final gisX = _toDouble(json['GIS_X_COOR']);
+    final gisY = _toDouble(json['GIS_Y_COOR']);
+    if (gisX == null || gisY == null) return null;
+    return CoordinateConverter.katecToWgs84(gisX, gisY);
   }
 
   static int? _toInt(dynamic v) {

@@ -10,8 +10,8 @@ class Station {
     required this.address,
     required this.distanceKm,
     required this.prices,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
     this.isSelfService = false,
     this.phone = '',
     this.operatingHours = '24시간 영업',
@@ -24,12 +24,16 @@ class Station {
   final String address;
   final double distanceKm;
   final Map<FuelType, int> prices;
-  final double latitude;
-  final double longitude;
+
+  final double? latitude;
+  final double? longitude;
+
   final bool isSelfService;
   final String phone;
   final String operatingHours;
   final Set<StationAmenity> amenities;
+
+  bool get hasCoordinates => latitude != null && longitude != null;
 
   int? priceOf(FuelType type) => prices[type];
 }

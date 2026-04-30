@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/features/favorites/data/favorites_repository.dart';
+import 'package:fuelkeeper/features/home/application/home_providers.dart';
+import 'package:fuelkeeper/features/home/domain/station.dart';
 
 final favoritesRepositoryProvider = Provider<FavoritesRepository>(
   (ref) => FavoritesRepository(),
@@ -32,4 +34,21 @@ final favoriteIdsProvider = AsyncNotifierProvider<FavoriteIds, Set<String>>(
 final isFavoriteProvider = Provider.family<bool, String>((ref, stationId) {
   final asyncIds = ref.watch(favoriteIdsProvider);
   return asyncIds.value?.contains(stationId) ?? false;
+});
+
+final favoriteStationsProvider = FutureProvider<List<Station>>((ref) async {
+  final ids = await ref.watch(favoriteIdsProvider.future);
+  if (ids.isEmpty) return const [];
+
+  final repo = ref.watch(stationRepositoryProvider);
+  final results = await Future.wait(
+    ids.map((id) async {
+      try {
+        return await repo.fetchById(id);
+      } catch (_) {
+        return null;
+      }
+    }),
+  );
+  return results.whereType<Station>().toList();
 });
