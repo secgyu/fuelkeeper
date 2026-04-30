@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -19,9 +19,9 @@ class StationPickerSheet extends StatelessWidget {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: AppColors.bgSurface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+          decoration: BoxDecoration(
+            color: context.colors.bgSurface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
           ),
           child: Column(
             children: [
@@ -30,7 +30,7 @@ class StationPickerSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.borderHair,
+                  color: context.colors.borderHair,
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
               ),
@@ -43,7 +43,7 @@ class StationPickerSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
-              const Divider(height: 1, color: AppColors.borderHair),
+              Divider(height: 1, color: context.colors.borderHair),
               Expanded(
                 child: ListView.builder(
                   controller: scrollController,
@@ -63,10 +63,10 @@ class StationPickerSheet extends StatelessWidget {
                       ),
                       title: Text(
                         s.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: context.colors.textPrimary,
                         ),
                       ),
                       subtitle: Text(

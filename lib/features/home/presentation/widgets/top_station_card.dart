@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -29,7 +29,7 @@ class TopStationCard extends StatelessWidget {
     final delta = referencePrice != null ? price - referencePrice! : null;
 
     return Material(
-      color: AppColors.bgSurface,
+      color: context.colors.bgSurface,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
         onTap: onTap,
@@ -37,7 +37,7 @@ class TopStationCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.borderHair),
+            border: Border.all(color: context.colors.borderHair),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -45,7 +45,7 @@ class TopStationCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(width: 4, color: AppColors.accent),
+                  Container(width: 4, color: context.colors.accent),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -54,15 +54,15 @@ class TopStationCard extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              const _Badge(
+                              _Badge(
                                 label: '최저가',
-                                color: AppColors.accent,
+                                color: context.colors.accent,
                               ),
                               const SizedBox(width: AppSpacing.sm),
                               if (station.isSelfService)
-                                const _Badge(
+                                _Badge(
                                   label: '셀프',
-                                  color: AppColors.primary,
+                                  color: context.colors.primary,
                                   filled: false,
                                 ),
                               const Spacer(),
@@ -105,12 +105,12 @@ class TopStationCard extends StatelessWidget {
                                 letterSpacing: -1.2,
                               ),
                               const SizedBox(width: 6),
-                              const Padding(
-                                padding: EdgeInsets.only(bottom: 10),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
                                 child: Text(
                                   '원/L',
                                   style: TextStyle(
-                                    color: AppColors.textTertiary,
+                                    color: context.colors.textTertiary,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -122,23 +122,23 @@ class TopStationCard extends StatelessWidget {
                             const SizedBox(height: AppSpacing.md),
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.trending_down_rounded,
-                                  color: AppColors.accent,
+                                  color: context.colors.accent,
                                   size: 14,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   '전국 평균 대비',
                                   style: AppTypography.caption.copyWith(
-                                    color: AppColors.textSecondary,
+                                    color: context.colors.textSecondary,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   '$delta원',
-                                  style: const TextStyle(
-                                    color: AppColors.accent,
+                                  style: TextStyle(
+                                    color: context.colors.accent,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                   ),

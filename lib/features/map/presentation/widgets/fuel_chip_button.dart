@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
@@ -26,7 +26,7 @@ class FuelChipButton extends StatelessWidget {
       child: Row(
         children: [
           Material(
-            color: AppColors.bgSurface,
+            color: context.colors.bgSurface,
             borderRadius: BorderRadius.circular(AppRadius.full),
             elevation: 2,
             shadowColor: Colors.black.withValues(alpha: 0.06),
@@ -40,26 +40,26 @@ class FuelChipButton extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.local_gas_station_rounded,
                       size: 16,
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       fuelType.label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: context.colors.textPrimary,
                         letterSpacing: -0.2,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(
+                    Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 18,
-                      color: AppColors.textTertiary,
+                      color: context.colors.textTertiary,
                     ),
                   ],
                 ),

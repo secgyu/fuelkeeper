@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/core/utils/formatters.dart';
@@ -18,10 +18,10 @@ class FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm, left: 2),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: AppColors.textSecondary,
+          color: context.colors.textSecondary,
         ),
       ),
     );
@@ -45,9 +45,9 @@ class StationField extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.bgPrimary,
+          color: context.colors.bgPrimary,
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: AppColors.borderHair),
+          border: Border.all(color: context.colors.borderHair),
         ),
         child: Row(
           children: [
@@ -64,27 +64,27 @@ class StationField extends StatelessWidget {
               Expanded(
                 child: Text(
                   station!.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
               ),
             ] else
-              const Expanded(
+              Expanded(
                 child: Text(
                   '주유소를 선택해주세요',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textTertiary,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ),
-            const Icon(
+            Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
           ],
         ),
@@ -111,25 +111,25 @@ class DateField extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.bgPrimary,
+          color: context.colors.bgPrimary,
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: AppColors.borderHair),
+          border: Border.all(color: context.colors.borderHair),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.calendar_today_rounded,
               size: 16,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 formatted,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
             ),
@@ -160,17 +160,17 @@ class FuelTypeSelector extends StatelessWidget {
             label: Text(t.label),
             selected: selected == t,
             onSelected: (_) => onChanged(t),
-            backgroundColor: AppColors.bgPrimary,
-            selectedColor: AppColors.textPrimary,
+            backgroundColor: context.colors.bgPrimary,
+            selectedColor: context.colors.textPrimary,
             labelStyle: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: selected == t ? Colors.white : AppColors.textSecondary,
+              color: selected == t ? Colors.white : context.colors.textSecondary,
             ),
             side: BorderSide(
               color: selected == t
-                  ? AppColors.textPrimary
-                  : AppColors.borderHair,
+                  ? context.colors.textPrimary
+                  : context.colors.borderHair,
             ),
             showCheckmark: false,
           ),
@@ -212,28 +212,28 @@ class NumberField extends StatelessWidget {
           ],
           onChanged: onChanged,
           textAlign: TextAlign.right,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
           decoration: InputDecoration(
             hintText: '0',
             suffixText: suffix,
-            suffixStyle: const TextStyle(
+            suffixStyle: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
             filled: true,
-            fillColor: AppColors.bgPrimary,
+            fillColor: context.colors.bgPrimary,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
             ),
-            border: _border(AppColors.borderHair),
-            enabledBorder: _border(AppColors.borderHair),
-            focusedBorder: _border(AppColors.primary, width: 1.5),
+            border: _border(context.colors.borderHair),
+            enabledBorder: _border(context.colors.borderHair),
+            focusedBorder: _border(context.colors.primary, width: 1.5),
           ),
         ),
       ],
@@ -258,27 +258,27 @@ class TotalCostSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.06),
+        color: context.colors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+        border: Border.all(color: context.colors.primary.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
+          Text(
             '결제 금액',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           Text(
             Formatters.currency(totalCost),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+              color: context.colors.primary,
             ),
           ),
         ],

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
-
-  static const Color background = AppColors.brandPrimary;
 
   @override
   ConsumerState<SplashPage> createState() => _SplashPageState();
@@ -65,7 +63,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
     final imageSize = width * 0.55;
 
     return Scaffold(
-      backgroundColor: SplashPage.background,
+      backgroundColor: context.colors.brandPrimary,
       body: Stack(
         children: [
           Center(

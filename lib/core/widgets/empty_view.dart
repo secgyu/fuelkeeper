@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 
@@ -29,19 +29,19 @@ class EmptyView extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.bgSurface,
+                color: context.colors.bgSurface,
                 borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(color: AppColors.borderHair),
+                border: Border.all(color: context.colors.borderHair),
               ),
-              child: Icon(icon, color: AppColors.textTertiary, size: 28),
+              child: Icon(icon, color: context.colors.textTertiary, size: 28),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 letterSpacing: -0.3,
               ),
             ),
@@ -50,10 +50,10 @@ class EmptyView extends StatelessWidget {
               Text(
                 message!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textTertiary,
+                  color: context.colors.textTertiary,
                   height: 1.5,
                 ),
               ),

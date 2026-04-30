@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
@@ -51,16 +51,22 @@ class _FuelChip extends StatelessWidget {
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppColors.textPrimary : AppColors.bgSurface,
+          color: selected
+              ? context.colors.textPrimary
+              : context.colors.bgSurface,
           borderRadius: BorderRadius.circular(AppRadius.full),
           border: Border.all(
-            color: selected ? AppColors.textPrimary : AppColors.borderHair,
+            color: selected
+                ? context.colors.textPrimary
+                : context.colors.borderHair,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : AppColors.textSecondary,
+            color: selected
+                ? context.colors.bgPrimary
+                : context.colors.textSecondary,
             fontSize: 13,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
           ),

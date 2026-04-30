@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -19,9 +19,9 @@ class InfoSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.base),
         decoration: BoxDecoration(
-          color: AppColors.bgSurface,
+          color: context.colors.bgSurface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.borderHair),
+          border: Border.all(color: context.colors.borderHair),
         ),
         child: Column(
           children: [
@@ -43,14 +43,14 @@ class InfoSection extends StatelessWidget {
               value: station.operatingHours,
             ),
             const SizedBox(height: AppSpacing.base),
-            const Divider(height: 1, color: AppColors.borderHair),
+            Divider(height: 1, color: context.colors.borderHair),
             const SizedBox(height: AppSpacing.base),
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 '편의시설',
                 style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
@@ -92,24 +92,24 @@ class _InfoRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: AppColors.textTertiary),
+        Icon(icon, size: 18, color: context.colors.textTertiary),
         const SizedBox(width: AppSpacing.md),
         SizedBox(
           width: 56,
           child: Text(
             label,
             style: AppTypography.caption.copyWith(
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
         ),
@@ -128,20 +128,20 @@ class _AmenityChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.bgMuted,
+        color: context.colors.bgMuted,
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(amenity.icon, size: 14, color: AppColors.textSecondary),
+          Icon(amenity.icon, size: 14, color: context.colors.textSecondary),
           const SizedBox(width: 4),
           Text(
             amenity.label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
         ],

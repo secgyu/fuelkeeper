@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -29,21 +29,32 @@ class StationListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final price = station.priceOf(fuelType)!;
     final diffFromLowest = price - lowestPrice;
+    final priceLabel = '${fuelType.label} 가격 ${Formatters.thousands(price)}원';
+    final diffLabel = diffFromLowest == 0
+        ? ', 최저가'
+        : ', 최저가보다 ${Formatters.thousands(diffFromLowest)}원 비쌈';
+    final distanceLabel = ', 거리 ${Formatters.km(station.distanceKm)}';
+    final selfLabel = station.isSelfService ? ', 셀프 주유' : '';
 
-    return Material(
-      color: AppColors.bgSurface,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: InkWell(
-        onTap: onTap,
+    return Semantics(
+      button: true,
+      label:
+          '$rank위, ${station.name}, ${station.brand.label}, '
+          '$priceLabel$diffLabel$distanceLabel$selfLabel',
+      child: Material(
+        color: context.colors.bgSurface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Container(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.base,
             vertical: AppSpacing.base,
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.borderHair),
+            border: Border.all(color: context.colors.borderHair),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -53,10 +64,10 @@ class StationListTile extends StatelessWidget {
                 child: Text(
                   '$rank',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textTertiary,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ),
@@ -69,10 +80,10 @@ class StationListTile extends StatelessWidget {
                       station.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -92,8 +103,8 @@ class StationListTile extends StatelessWidget {
                         Container(
                           width: 2,
                           height: 2,
-                          decoration: const BoxDecoration(
-                            color: AppColors.textTertiary,
+                          decoration: BoxDecoration(
+                            color: context.colors.textTertiary,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -107,8 +118,8 @@ class StationListTile extends StatelessWidget {
                           Container(
                             width: 2,
                             height: 2,
-                            decoration: const BoxDecoration(
-                              color: AppColors.textTertiary,
+                            decoration: BoxDecoration(
+                              color: context.colors.textTertiary,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -127,27 +138,28 @@ class StationListTile extends StatelessWidget {
                   PriceText(amount: price, size: 18, weight: FontWeight.w700),
                   const SizedBox(height: 4),
                   if (diffFromLowest == 0)
-                    const Text(
+                    Text(
                       '최저',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.accent,
+                        color: context.colors.accent,
                       ),
                     )
                   else
                     Text(
                       '+$diffFromLowest원',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textTertiary,
+                        color: context.colors.textTertiary,
                       ),
                     ),
                 ],
               ),
               FavoriteButton(stationId: station.id, size: 20),
             ],
+          ),
           ),
         ),
       ),

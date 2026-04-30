@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 import 'package:fuelkeeper/features/logs/application/fuel_log_providers.dart';
@@ -19,9 +19,9 @@ class LogsPage extends ConsumerWidget {
     final summary = ref.watch(currentMonthSummaryProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: context.colors.bgPrimary,
       appBar: AppBar(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: context.colors.bgPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: const Text('주유 로그', style: AppTypography.h2),
@@ -56,8 +56,9 @@ class LogsPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showFuelLogFormSheet(context),
-        backgroundColor: AppColors.textPrimary,
-        foregroundColor: Colors.white,
+        backgroundColor: context.colors.textPrimary,
+
+        foregroundColor: context.colors.bgPrimary,
         elevation: 2,
         icon: const Icon(Icons.add_rounded),
         label: const Text(
@@ -85,8 +86,7 @@ class LogsPage extends ConsumerWidget {
             (_, i) => LogTile(
               log: monthLogs[i],
               onDelete: () async {
-                final actions =
-                    await ref.read(fuelLogActionsProvider.future);
+                final actions = await ref.read(fuelLogActionsProvider.future);
                 await actions.delete(monthLogs[i].id);
               },
             ),
@@ -116,10 +116,10 @@ class _MonthHeader extends StatelessWidget {
         ),
         child: Text(
           month,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             letterSpacing: -0.2,
           ),
         ),

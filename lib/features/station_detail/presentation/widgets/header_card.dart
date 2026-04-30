@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -28,9 +28,9 @@ class HeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: context.colors.bgSurface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.borderHair),
+        border: Border.all(color: context.colors.borderHair),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,7 +41,7 @@ class HeaderCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             station.address,
-            style: AppTypography.body2.copyWith(color: AppColors.textTertiary),
+            style: AppTypography.body2.copyWith(color: context.colors.textTertiary),
           ),
           const SizedBox(height: AppSpacing.lg),
           _PriceRow(price: price, fuelType: fuelType),
@@ -75,7 +75,7 @@ class _BrandRow extends StatelessWidget {
         Text(station.brand.label, style: AppTypography.caption),
         if (station.isSelfService) ...[
           const SizedBox(width: 8),
-          const TagChip(label: '셀프', color: AppColors.primary),
+          TagChip(label: '셀프', color: context.colors.primary),
         ],
         const Spacer(),
         Text(
@@ -105,12 +105,12 @@ class _PriceRow extends StatelessWidget {
           letterSpacing: -1.2,
         ),
         const SizedBox(width: 6),
-        const Padding(
-          padding: EdgeInsets.only(bottom: 10),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
           child: Text(
             '원/L',
             style: TextStyle(
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -120,15 +120,15 @@ class _PriceRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: AppColors.bgMuted,
+            color: context.colors.bgMuted,
             borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Text(
             fuelType.label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
         ),
@@ -144,7 +144,7 @@ class _DeltaRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCheaper = delta < 0;
-    final color = isCheaper ? AppColors.accent : AppColors.danger;
+    final color = isCheaper ? context.colors.accent : context.colors.danger;
     return Row(
       children: [
         Icon(
@@ -158,7 +158,7 @@ class _DeltaRow extends StatelessWidget {
         Text(
           '전국 평균 대비',
           style: AppTypography.caption.copyWith(
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
         const SizedBox(width: 6),

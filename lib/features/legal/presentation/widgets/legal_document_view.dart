@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 
@@ -102,12 +102,12 @@ class LegalBulletList extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 9, right: AppSpacing.sm),
+                Padding(
+                  padding: const EdgeInsets.only(top: 9, right: AppSpacing.sm),
                   child: Icon(
                     Icons.circle,
                     size: 4,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
                 Expanded(child: Text(item, style: AppTypography.body1)),
@@ -128,9 +128,9 @@ class LegalKeyValueTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: context.colors.bgSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderHair),
+        border: Border.all(color: context.colors.borderHair),
       ),
       child: Column(
         children: [
@@ -149,7 +149,7 @@ class LegalKeyValueTable extends StatelessWidget {
                       rows[i].label,
                       style: AppTypography.body2.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ),
@@ -160,10 +160,10 @@ class LegalKeyValueTable extends StatelessWidget {
               ),
             ),
             if (i != rows.length - 1)
-              const Divider(
+              Divider(
                 height: 1,
                 thickness: 1,
-                color: AppColors.borderHair,
+                color: context.colors.borderHair,
               ),
           ],
         ],
@@ -182,24 +182,24 @@ class _DisclaimerBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: context.colors.bgSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderHair),
+        border: Border.all(color: context.colors.borderHair),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.info_outline_rounded,
             size: 18,
-            color: AppColors.textTertiary,
+            color: context.colors.textTertiary,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               text,
               style: AppTypography.body2.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ),

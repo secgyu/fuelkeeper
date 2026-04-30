@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
@@ -10,7 +10,7 @@ Future<FuelType?> showFuelPickerSheet(
 }) {
   return showModalBottomSheet<FuelType>(
     context: context,
-    backgroundColor: AppColors.bgSurface,
+    backgroundColor: context.colors.bgSurface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
     ),
@@ -31,8 +31,8 @@ class _FuelPickerContent extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
                 AppSpacing.sm,
                 AppSpacing.lg,
@@ -45,7 +45,7 @@ class _FuelPickerContent extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                     letterSpacing: -0.3,
                   ),
                 ),
@@ -59,13 +59,13 @@ class _FuelPickerContent extends StatelessWidget {
                   style: TextStyle(
                     fontWeight:
                         isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 trailing: isSelected
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_rounded,
-                        color: AppColors.textPrimary,
+                        color: context.colors.textPrimary,
                       )
                     : null,
                 onTap: () => Navigator.of(context).pop(fuel),

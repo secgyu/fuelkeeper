@@ -3,56 +3,77 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
-import 'package:fuelkeeper/features/home/application/home_providers.dart';
-import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
+import 'package:fuelkeeper/app/theme/theme_mode_provider.dart';
 import 'package:fuelkeeper/features/settings/presentation/widgets/settings_primitives.dart';
 
-class FuelTypeSettingTile extends ConsumerWidget {
-  const FuelTypeSettingTile({super.key});
+class ThemeModeSettingTile extends ConsumerWidget {
+  const ThemeModeSettingTile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(selectedFuelTypeProvider);
+    final mode = ref.watch(themeModeProvider);
 
     return SettingsTile(
-      icon: Icons.local_gas_station_rounded,
-      title: '기본 연료 종류',
+      icon: _iconOf(mode),
+      title: '테마',
       trailing: Text(
-        selected.label,
+        _labelOf(mode),
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w700,
           color: context.colors.primary,
         ),
       ),
-      onTap: () => _showPicker(context, ref, selected),
+      onTap: () => _showPicker(context, ref, mode),
     );
   }
 
   Future<void> _showPicker(
     BuildContext context,
     WidgetRef ref,
-    FuelType current,
+    ThemeMode current,
   ) async {
-    final picked = await showModalBottomSheet<FuelType>(
+    final picked = await showModalBottomSheet<ThemeMode>(
       context: context,
       backgroundColor: context.colors.bgPrimary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
-      builder: (_) => _FuelTypePickerSheet(current: current),
+      builder: (_) => _ThemeModePickerSheet(current: current),
     );
 
     if (picked != null && picked != current) {
-      ref.read(selectedFuelTypeProvider.notifier).set(picked);
+      await ref.read(themeModeProvider.notifier).set(picked);
+    }
+  }
+
+  static IconData _iconOf(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return Icons.brightness_auto_rounded;
+      case ThemeMode.light:
+        return Icons.light_mode_rounded;
+      case ThemeMode.dark:
+        return Icons.dark_mode_rounded;
+    }
+  }
+
+  static String _labelOf(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return '시스템 설정';
+      case ThemeMode.light:
+        return '라이트';
+      case ThemeMode.dark:
+        return '다크';
     }
   }
 }
 
-class _FuelTypePickerSheet extends StatelessWidget {
-  const _FuelTypePickerSheet({required this.current});
+class _ThemeModePickerSheet extends StatelessWidget {
+  const _ThemeModePickerSheet({required this.current});
 
-  final FuelType current;
+  final ThemeMode current;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +91,7 @@ class _FuelTypePickerSheet extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '기본 연료 종류',
+                '테마',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -79,13 +100,17 @@ class _FuelTypePickerSheet extends StatelessWidget {
               ),
             ),
           ),
-          for (final t in FuelType.values)
+          for (final m in ThemeMode.values)
             ListTile(
-              title: Text(t.label),
-              trailing: t == current
-                  ? Icon(Icons.check_rounded, color: context.colors.primary)
+              leading: Icon(ThemeModeSettingTile._iconOf(m)),
+              title: Text(ThemeModeSettingTile._labelOf(m)),
+              trailing: m == current
+                  ? Icon(
+                      Icons.check_rounded,
+                      color: context.colors.primary,
+                    )
                   : null,
-              onTap: () => Navigator.of(context).pop(t),
+              onTap: () => Navigator.of(context).pop(m),
             ),
           const SizedBox(height: AppSpacing.sm),
         ],

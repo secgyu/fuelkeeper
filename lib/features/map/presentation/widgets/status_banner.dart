@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 
@@ -8,7 +8,7 @@ class StatusBanner extends StatelessWidget {
     super.key,
     required this.icon,
     required this.text,
-    this.color = AppColors.textSecondary,
+    this.color,
     this.spinning = false,
     this.actionLabel,
     this.onAction,
@@ -16,13 +16,14 @@ class StatusBanner extends StatelessWidget {
 
   final IconData icon;
   final String text;
-  final Color color;
+  final Color? color;
   final bool spinning;
   final String? actionLabel;
   final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
+    final fg = color ?? context.colors.textSecondary;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -31,7 +32,7 @@ class StatusBanner extends StatelessWidget {
         AppSpacing.sm,
       ),
       child: Material(
-        color: AppColors.bgSurface,
+        color: context.colors.bgSurface,
         borderRadius: BorderRadius.circular(AppRadius.full),
         elevation: 2,
         shadowColor: Colors.black.withValues(alpha: 0.06),
@@ -47,14 +48,14 @@ class StatusBanner extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 1.8),
                 )
               else
-                Icon(icon, size: 16, color: color),
+                Icon(icon, size: 16, color: fg),
               const SizedBox(width: 8),
               Text(
                 text,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: color,
+                  color: fg,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -70,10 +71,10 @@ class StatusBanner extends StatelessWidget {
                     ),
                     child: Text(
                       actionLabel!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: context.colors.primary,
                       ),
                     ),
                   ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/core/utils/formatters.dart';
 
 class PriceText extends StatelessWidget {
@@ -23,10 +23,13 @@ class PriceText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formatted = Formatters.thousands(amount);
-    return RichText(
-      text: TextSpan(
+    return Semantics(
+      label: '$formatted원',
+      excludeSemantics: true,
+      child: RichText(
+        text: TextSpan(
         style: TextStyle(
-          color: color ?? AppColors.textPrimary,
+          color: color ?? context.colors.textPrimary,
           fontFamily: 'Pretendard',
           fontWeight: weight,
           letterSpacing: letterSpacing,
@@ -39,7 +42,7 @@ class PriceText extends StatelessWidget {
             style: TextStyle(
               fontSize: size * 0.62,
               fontWeight: FontWeight.w600,
-              color: symbolColor ?? AppColors.textSecondary,
+              color: symbolColor ?? context.colors.textSecondary,
               letterSpacing: 0,
             ),
           ),
@@ -49,6 +52,7 @@ class PriceText extends StatelessWidget {
             style: TextStyle(fontSize: size),
           ),
         ],
+        ),
       ),
     );
   }

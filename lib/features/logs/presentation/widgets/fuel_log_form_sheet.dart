@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -120,15 +120,15 @@ class _FuelLogFormSheetState extends ConsumerState<_FuelLogFormSheet> {
         expand: false,
         builder: (context, scrollController) {
           return Container(
-            decoration: const BoxDecoration(
-              color: AppColors.bgSurface,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+            decoration: BoxDecoration(
+              color: context.colors.bgSurface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
             ),
             child: Column(
               children: [
                 const _SheetGrabber(),
                 _SheetHeader(onClose: () => Navigator.pop(context)),
-                const Divider(height: 1, color: AppColors.borderHair),
+                Divider(height: 1, color: context.colors.borderHair),
                 Expanded(
                   child: _FormBody(
                     scrollController: scrollController,
@@ -168,7 +168,7 @@ class _SheetGrabber extends StatelessWidget {
         width: 40,
         height: 4,
         decoration: BoxDecoration(
-          color: AppColors.borderHair,
+          color: context.colors.borderHair,
           borderRadius: BorderRadius.circular(AppRadius.full),
         ),
       ),

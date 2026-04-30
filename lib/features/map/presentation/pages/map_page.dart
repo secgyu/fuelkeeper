@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/core/utils/coordinate_converter.dart';
@@ -103,7 +103,7 @@ class _MapPageState extends ConsumerState<MapPage> {
     final isEmpty = !isLoading && error == null && stations.isEmpty;
 
     return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: context.colors.bgPrimary,
       body: Stack(
         children: [
           NaverMap(
@@ -148,7 +148,7 @@ class _MapPageState extends ConsumerState<MapPage> {
                   StatusBanner(
                     icon: Icons.error_outline_rounded,
                     text: '주유소 정보를 불러오지 못했어요',
-                    color: AppColors.danger,
+                    color: context.colors.danger,
                     actionLabel: '재시도',
                     onAction: () => ref.invalidate(stationsProvider),
                   ),
@@ -251,9 +251,9 @@ class _MapPageState extends ConsumerState<MapPage> {
     final overlay = controller.getLocationOverlay();
     overlay.setPosition(NLatLng(location.latitude, location.longitude));
     overlay.setIsVisible(true);
-    overlay.setCircleColor(AppColors.brandPrimary.withValues(alpha: 0.18));
+    overlay.setCircleColor(context.colors.brandPrimary.withValues(alpha: 0.18));
     overlay.setCircleOutlineColor(
-      AppColors.brandPrimary.withValues(alpha: 0.5),
+      context.colors.brandPrimary.withValues(alpha: 0.5),
     );
     overlay.setCircleOutlineWidth(1);
     overlay.setCircleRadius(40);
@@ -285,9 +285,9 @@ class _MapPageState extends ConsumerState<MapPage> {
         ),
         padding: const EdgeInsets.all(3),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.brandPrimary,
+            color: context.colors.brandPrimary,
           ),
           alignment: Alignment.center,
           child: const Icon(

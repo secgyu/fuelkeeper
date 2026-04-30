@@ -1,54 +1,62 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'app_color_tokens.dart';
 import 'app_radius.dart';
 import 'app_typography.dart';
 
 class AppTheme {
   AppTheme._();
 
-  static ThemeData light() {
+  static ThemeData light() => _build(AppColorTokens.light, Brightness.light);
+  static ThemeData dark() => _build(AppColorTokens.dark, Brightness.dark);
+
+  static ThemeData _build(AppColorTokens tokens, Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
     final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.light,
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
-      secondary: AppColors.accent,
-      onSecondary: Colors.white,
-      error: AppColors.danger,
-      onError: Colors.white,
-      surface: AppColors.bgSurface,
-      onSurface: AppColors.textPrimary,
+      seedColor: tokens.primary,
+      brightness: brightness,
+      primary: tokens.primary,
+      onPrimary: isDark ? const Color(0xFF0E0F12) : Colors.white,
+      secondary: tokens.accent,
+      onSecondary: isDark ? const Color(0xFF0E0F12) : Colors.white,
+      error: tokens.danger,
+      onError: isDark ? const Color(0xFF0E0F12) : Colors.white,
+      surface: tokens.bgSurface,
+      onSurface: tokens.textPrimary,
     );
 
     return ThemeData(
       useMaterial3: true,
+      brightness: brightness,
       colorScheme: scheme,
-      scaffoldBackgroundColor: AppColors.bgPrimary,
+      scaffoldBackgroundColor: tokens.bgPrimary,
       fontFamily: 'Pretendard',
-      textTheme: const TextTheme(
-        displayLarge: AppTypography.priceHero,
-        displayMedium: AppTypography.priceLarge,
-        displaySmall: AppTypography.priceMedium,
-        headlineLarge: AppTypography.h1,
-        headlineMedium: AppTypography.h2,
-        titleLarge: AppTypography.h3,
-        bodyLarge: AppTypography.body1,
-        bodyMedium: AppTypography.body2,
-        labelSmall: AppTypography.caption,
+      extensions: [tokens],
+      textTheme: TextTheme(
+        displayLarge: AppTypography.priceHero.copyWith(color: tokens.textPrimary),
+        displayMedium:
+            AppTypography.priceLarge.copyWith(color: tokens.textPrimary),
+        displaySmall:
+            AppTypography.priceMedium.copyWith(color: tokens.textPrimary),
+        headlineLarge: AppTypography.h1.copyWith(color: tokens.textPrimary),
+        headlineMedium: AppTypography.h2.copyWith(color: tokens.textPrimary),
+        titleLarge: AppTypography.h3.copyWith(color: tokens.textPrimary),
+        bodyLarge: AppTypography.body1.copyWith(color: tokens.textPrimary),
+        bodyMedium: AppTypography.body2.copyWith(color: tokens.textSecondary),
+        labelSmall: AppTypography.caption.copyWith(color: tokens.textTertiary),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.bgPrimary,
-        foregroundColor: AppColors.textPrimary,
+      appBarTheme: AppBarTheme(
+        backgroundColor: tokens.bgPrimary,
+        foregroundColor: tokens.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        titleTextStyle: AppTypography.h3,
+        titleTextStyle: AppTypography.h3.copyWith(color: tokens.textPrimary),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: tokens.primary,
+          foregroundColor: isDark ? const Color(0xFF0E0F12) : Colors.white,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -58,10 +66,10 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textPrimary,
-          backgroundColor: AppColors.bgSurface,
+          foregroundColor: tokens.textPrimary,
+          backgroundColor: tokens.bgSurface,
           minimumSize: const Size.fromHeight(52),
-          side: const BorderSide(color: AppColors.borderHair),
+          side: BorderSide(color: tokens.borderHair),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),
@@ -69,16 +77,16 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.bgSurface,
+        color: tokens.bgSurface,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: const BorderSide(color: AppColors.borderHair),
+          side: BorderSide(color: tokens.borderHair),
         ),
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.borderHair,
+      dividerTheme: DividerThemeData(
+        color: tokens.borderHair,
         thickness: 1,
         space: 0,
       ),

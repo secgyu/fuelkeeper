@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
 import 'package:fuelkeeper/features/favorites/application/favorites_providers.dart';
@@ -93,10 +93,10 @@ class _NoPriceForFuelState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.local_gas_station_outlined,
               size: 48,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
             const SizedBox(height: AppSpacing.md),
             const Text('해당 연료 가격 정보가 없어요', style: AppTypography.h3),
@@ -104,7 +104,7 @@ class _NoPriceForFuelState extends StatelessWidget {
             Text(
               '다른 연료 종류로 변경해보세요',
               style: AppTypography.body2.copyWith(
-                color: AppColors.textTertiary,
+                color: context.colors.textTertiary,
               ),
             ),
           ],
@@ -129,12 +129,12 @@ class _EmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: AppColors.danger.withValues(alpha: 0.10),
+                color: context.colors.danger.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.favorite_outline_rounded,
-                color: AppColors.danger,
+                color: context.colors.danger,
                 size: 32,
               ),
             ),
@@ -145,7 +145,7 @@ class _EmptyState extends StatelessWidget {
               '주유소 옆 하트 버튼으로\n자주 가는 곳을 저장해보세요.',
               textAlign: TextAlign.center,
               style: AppTypography.body2.copyWith(
-                color: AppColors.textTertiary,
+                color: context.colors.textTertiary,
               ),
             ),
           ],

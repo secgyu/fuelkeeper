@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -28,7 +28,7 @@ class StationPreviewCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Material(
-          color: AppColors.bgSurface,
+          color: context.colors.bgSurface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           elevation: 6,
           shadowColor: Colors.black.withValues(alpha: 0.12),
@@ -55,10 +55,10 @@ class StationPreviewCard extends StatelessWidget {
                       children: [
                         Text(
                           station.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: context.colors.textPrimary,
                             letterSpacing: -0.3,
                           ),
                         ),
@@ -76,28 +76,28 @@ class StationPreviewCard extends StatelessWidget {
                       children: [
                         Text(
                           Formatters.won(price),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: context.colors.textPrimary,
                             letterSpacing: -0.4,
                           ),
                         ),
                         Text(
                           fuelType.label,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textTertiary,
+                            color: context.colors.textTertiary,
                           ),
                         ),
                       ],
                     ),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close_rounded,
                       size: 18,
-                      color: AppColors.textTertiary,
+                      color: context.colors.textTertiary,
                     ),
                     onPressed: onClose,
                   ),

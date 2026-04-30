@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
@@ -27,9 +27,9 @@ class FuelPriceTable extends StatelessWidget {
       title: '연료별 가격',
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.bgSurface,
+          color: context.colors.bgSurface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.borderHair),
+          border: Border.all(color: context.colors.borderHair),
         ),
         child: Column(
           children: [
@@ -40,9 +40,9 @@ class FuelPriceTable extends StatelessWidget {
                 isCurrent: entries[i] == currentFuel,
               ),
               if (i != entries.length - 1)
-                const Divider(
+                Divider(
                   height: 1,
-                  color: AppColors.borderHair,
+                  color: context.colors.borderHair,
                   indent: AppSpacing.base,
                   endIndent: AppSpacing.base,
                 ),
@@ -79,19 +79,19 @@ class _FuelPriceRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           if (isCurrent) ...[
             const SizedBox(width: 8),
-            const TagChip(label: '선택', color: AppColors.primary),
+            TagChip(label: '선택', color: context.colors.primary),
           ],
           const Spacer(),
           PriceText(
             amount: price,
             size: 16,
             weight: FontWeight.w700,
-            color: isCurrent ? AppColors.primary : AppColors.textPrimary,
+            color: isCurrent ? context.colors.primary : context.colors.textPrimary,
           ),
         ],
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/features/stats/application/stats_providers.dart';
 
 class EfficiencyTrendChart extends StatelessWidget {
@@ -13,16 +13,20 @@ class EfficiencyTrendChart extends StatelessWidget {
       height: 180,
       child: CustomPaint(
         size: Size.infinite,
-        painter: _EfficiencyPainter(buckets: buckets),
+        painter: _EfficiencyPainter(
+          buckets: buckets,
+          tokens: context.colors,
+        ),
       ),
     );
   }
 }
 
 class _EfficiencyPainter extends CustomPainter {
-  _EfficiencyPainter({required this.buckets});
+  _EfficiencyPainter({required this.buckets, required this.tokens});
 
   final List<MonthlyBucket> buckets;
+  final AppColorTokens tokens;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -48,7 +52,7 @@ class _EfficiencyPainter extends CustomPainter {
     final slotWidth = (size.width - padX * 2) / (buckets.length - 1).clamp(1, 99);
 
     final gridPaint = Paint()
-      ..color = AppColors.borderHair
+      ..color = tokens.borderHair
       ..strokeWidth = 1;
     canvas.drawLine(
       Offset(0, chartTop + chartHeight),
@@ -69,7 +73,7 @@ class _EfficiencyPainter extends CustomPainter {
     }
 
     final linePaint = Paint()
-      ..color = AppColors.accent
+      ..color = tokens.accent
       ..strokeWidth = 2.4
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -80,8 +84,8 @@ class _EfficiencyPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          AppColors.accent.withValues(alpha: 0.22),
-          AppColors.accent.withValues(alpha: 0),
+          tokens.accent.withValues(alpha: 0.22),
+          tokens.accent.withValues(alpha: 0),
         ],
       ).createShader(Rect.fromLTWH(0, chartTop, size.width, chartHeight));
 
@@ -110,9 +114,9 @@ class _EfficiencyPainter extends CustomPainter {
       canvas.drawPath(path, linePaint);
     }
 
-    final dotFill = Paint()..color = AppColors.bgSurface;
+    final dotFill = Paint()..color = tokens.bgSurface;
     final dotStroke = Paint()
-      ..color = AppColors.accent
+      ..color = tokens.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.2;
 
@@ -130,7 +134,7 @@ class _EfficiencyPainter extends CustomPainter {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w800,
-            color: isLatest ? AppColors.textPrimary : AppColors.textTertiary,
+            color: isLatest ? tokens.textPrimary : tokens.textTertiary,
             letterSpacing: -0.2,
           ),
         ),
@@ -151,7 +155,7 @@ class _EfficiencyPainter extends CustomPainter {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: isLatest ? AppColors.textPrimary : AppColors.textTertiary,
+            color: isLatest ? tokens.textPrimary : tokens.textTertiary,
             letterSpacing: -0.2,
           ),
         ),
@@ -166,12 +170,12 @@ class _EfficiencyPainter extends CustomPainter {
 
   void _drawEmpty(Canvas canvas, Size size) {
     final tp = TextPainter(
-      text: const TextSpan(
+      text: TextSpan(
         text: '추세를 그리려면 서로 다른 달에\n주유 기록이 2회 이상 필요해요',
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: AppColors.textTertiary,
+          color: tokens.textTertiary,
           height: 1.5,
         ),
       ),

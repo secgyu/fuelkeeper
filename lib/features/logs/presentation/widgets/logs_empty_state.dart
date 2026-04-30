@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 
@@ -17,32 +17,32 @@ class LogsEmptyState extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.bgSurface,
+              color: context.colors.bgSurface,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.borderHair),
+              border: Border.all(color: context.colors.borderHair),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.receipt_long_outlined,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
               size: 28,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          const Text(
+          Text(
             '아직 주유 기록이 없어요',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             '하단 + 버튼을 눌러 첫 기록을 남겨보세요',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
           ),
         ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -46,25 +46,25 @@ class HomePage extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.location_on_rounded,
                   size: 18,
-                  color: AppColors.primary,
+                  color: context.colors.primary,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   asyncAddress.maybeWhen(data: (a) => a, orElse: () => '내 위치'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(
+                Icon(
                   Icons.refresh_rounded,
                   size: 18,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ],
             ),
@@ -163,10 +163,10 @@ class _StationListView extends StatelessWidget {
             children: [
               Text(
                 '주변 ${stations.length}곳',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               const SortFilterRow(),
@@ -220,10 +220,10 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.local_gas_station_outlined,
               size: 48,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
             const SizedBox(height: AppSpacing.md),
             const Text('주변 주유소가 없어요', style: AppTypography.h3),
@@ -231,7 +231,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               '다른 연료 종류로 변경해보세요',
               style: AppTypography.body2.copyWith(
-                color: AppColors.textTertiary,
+                color: context.colors.textTertiary,
               ),
             ),
           ],
@@ -254,10 +254,10 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.cloud_off_rounded,
               size: 48,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
             const SizedBox(height: AppSpacing.md),
             const Text('주유소 정보를 불러오지 못했어요', style: AppTypography.h3),
@@ -266,7 +266,7 @@ class _ErrorState extends StatelessWidget {
               '인터넷 연결을 확인하고\n잠시 후 다시 시도해주세요.',
               textAlign: TextAlign.center,
               style: AppTypography.body2.copyWith(
-                color: AppColors.textTertiary,
+                color: context.colors.textTertiary,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),

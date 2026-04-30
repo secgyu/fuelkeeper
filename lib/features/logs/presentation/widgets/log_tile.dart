@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/core/utils/formatters.dart';
@@ -26,17 +26,17 @@ class LogTile extends StatelessWidget {
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: AppSpacing.lg),
           decoration: BoxDecoration(
-            color: AppColors.danger.withValues(alpha: 0.12),
+            color: context.colors.danger.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),
-          child: const Icon(Icons.delete_outline, color: AppColors.danger),
+          child: Icon(Icons.delete_outline, color: context.colors.danger),
         ),
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.bgSurface,
+            color: context.colors.bgSurface,
             borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: AppColors.borderHair),
+            border: Border.all(color: context.colors.borderHair),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,10 +56,10 @@ class LogTile extends StatelessWidget {
                   children: [
                     Text(
                       log.stationName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.colors.textPrimary,
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -69,10 +69,10 @@ class LogTile extends StatelessWidget {
                       ' · ${log.fuelType.label}'
                       ' · ${Formatters.liters(log.liters)}'
                       ' · ${Formatters.thousands(log.odometerKm)}km',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textTertiary,
+                        color: context.colors.textTertiary,
                       ),
                     ),
                   ],
@@ -83,20 +83,20 @@ class LogTile extends StatelessWidget {
                 children: [
                   Text(
                     Formatters.currency(log.totalCost),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: context.colors.textPrimary,
                       letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${Formatters.thousands(log.pricePerLiter)}원/L',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textTertiary,
+                      color: context.colors.textTertiary,
                     ),
                   ),
                 ],

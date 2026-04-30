@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 
@@ -19,10 +19,10 @@ class SettingsSectionHeader extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: AppColors.textTertiary,
+          color: context.colors.textTertiary,
           letterSpacing: 0.4,
         ),
       ),
@@ -35,9 +35,9 @@ class SettingsDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.base),
-      child: Divider(height: 1, thickness: 1, color: AppColors.borderHair),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+      child: Divider(height: 1, thickness: 1, color: context.colors.borderHair),
     );
   }
 }
@@ -47,8 +47,8 @@ class SettingsFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.base),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
       child: Column(
         children: [
           Text(
@@ -56,17 +56,17 @@ class SettingsFooter extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
               letterSpacing: -0.2,
             ),
           ),
-          SizedBox(height: 2),
+          const SizedBox(height: 2),
           Text(
             'Made with Flutter',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: AppColors.textTertiary,
+              color: context.colors.textTertiary,
             ),
           ),
         ],
@@ -106,11 +106,11 @@ class SettingsTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.bgSurface,
+                color: context.colors.bgSurface,
                 borderRadius: BorderRadius.circular(AppRadius.sm),
-                border: Border.all(color: AppColors.borderHair),
+                border: Border.all(color: context.colors.borderHair),
               ),
-              child: Icon(icon, size: 18, color: AppColors.textSecondary),
+              child: Icon(icon, size: 18, color: context.colors.textSecondary),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -119,10 +119,10 @@ class SettingsTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.colors.textPrimary,
                       letterSpacing: -0.2,
                     ),
                   ),
@@ -130,10 +130,10 @@ class SettingsTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textTertiary,
+                        color: context.colors.textTertiary,
                       ),
                     ),
                   ],
@@ -142,9 +142,9 @@ class SettingsTile extends StatelessWidget {
             ),
             ?trailing,
             if (onTap != null && trailing == null)
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.textTertiary,
+                color: context.colors.textTertiary,
               ),
           ],
         ),
@@ -172,10 +172,10 @@ class SettingsInfoTile extends StatelessWidget {
       title: title,
       trailing: Text(
         trailing,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: AppColors.textTertiary,
+          color: context.colors.textTertiary,
         ),
       ),
     );
@@ -200,8 +200,8 @@ Future<bool?> showDangerConfirmDialog(
         FilledButton.tonal(
           onPressed: () => Navigator.of(ctx).pop(true),
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.danger.withValues(alpha: 0.1),
-            foregroundColor: AppColors.danger,
+            backgroundColor: context.colors.danger.withValues(alpha: 0.1),
+            foregroundColor: context.colors.danger,
           ),
           child: const Text('삭제'),
         ),

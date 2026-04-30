@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/features/stats/application/stats_providers.dart';
 
 class MonthlyCostChart extends StatelessWidget {
@@ -13,16 +13,20 @@ class MonthlyCostChart extends StatelessWidget {
       height: 200,
       child: CustomPaint(
         size: Size.infinite,
-        painter: _MonthlyCostPainter(buckets: buckets),
+        painter: _MonthlyCostPainter(
+          buckets: buckets,
+          tokens: context.colors,
+        ),
       ),
     );
   }
 }
 
 class _MonthlyCostPainter extends CustomPainter {
-  _MonthlyCostPainter({required this.buckets});
+  _MonthlyCostPainter({required this.buckets, required this.tokens});
 
   final List<MonthlyBucket> buckets;
+  final AppColorTokens tokens;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -42,7 +46,7 @@ class _MonthlyCostPainter extends CustomPainter {
     final barWidth = (slot * 0.5).clamp(8.0, 36.0);
 
     final gridPaint = Paint()
-      ..color = AppColors.borderHair
+      ..color = tokens.borderHair
       ..strokeWidth = 1;
     canvas.drawLine(
       Offset(0, chartTop + chartHeight),
@@ -71,8 +75,8 @@ class _MonthlyCostPainter extends CustomPainter {
 
       final barPaint = Paint()
         ..color = isLatest
-            ? AppColors.textPrimary
-            : AppColors.textPrimary.withValues(alpha: 0.18);
+            ? tokens.textPrimary
+            : tokens.textPrimary.withValues(alpha: 0.18);
       canvas.drawRRect(rrect, barPaint);
 
       if (b.totalCost > 0) {
@@ -82,7 +86,7 @@ class _MonthlyCostPainter extends CustomPainter {
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w800,
-              color: isLatest ? AppColors.textPrimary : AppColors.textTertiary,
+              color: isLatest ? tokens.textPrimary : tokens.textTertiary,
               letterSpacing: -0.2,
             ),
           ),
@@ -103,7 +107,7 @@ class _MonthlyCostPainter extends CustomPainter {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: isLatest ? AppColors.textPrimary : AppColors.textTertiary,
+            color: isLatest ? tokens.textPrimary : tokens.textTertiary,
             letterSpacing: -0.2,
           ),
         ),

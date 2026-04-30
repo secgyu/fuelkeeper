@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:go_router/go_router.dart';
 
 class MainShell extends StatelessWidget {
@@ -47,30 +47,30 @@ class MainShell extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.bgSurface,
-          border: Border(top: BorderSide(color: AppColors.borderHair)),
+        decoration: BoxDecoration(
+          color: context.colors.bgSurface,
+          border: Border(top: BorderSide(color: context.colors.borderHair)),
         ),
         child: SafeArea(
           top: false,
           child: NavigationBarTheme(
             data: NavigationBarThemeData(
-              backgroundColor: AppColors.bgSurface,
-              indicatorColor: AppColors.primary.withValues(alpha: 0.10),
+              backgroundColor: context.colors.bgSurface,
+              indicatorColor: context.colors.primary.withValues(alpha: 0.10),
               surfaceTintColor: Colors.transparent,
               labelTextStyle: WidgetStateProperty.resolveWith((states) {
                 final selected = states.contains(WidgetState.selected);
                 return TextStyle(
                   fontSize: 11,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? AppColors.primary : AppColors.textSecondary,
+                  color: selected ? context.colors.primary : context.colors.textSecondary,
                 );
               }),
               iconTheme: WidgetStateProperty.resolveWith((states) {
                 final selected = states.contains(WidgetState.selected);
                 return IconThemeData(
                   size: 24,
-                  color: selected ? AppColors.primary : AppColors.textSecondary,
+                  color: selected ? context.colors.primary : context.colors.textSecondary,
                 );
               }),
             ),
@@ -85,6 +85,7 @@ class MainShell extends StatelessWidget {
                     icon: Icon(item.icon),
                     selectedIcon: Icon(item.activeIcon),
                     label: item.label,
+                    tooltip: '${item.label} 탭',
                   ),
               ],
             ),

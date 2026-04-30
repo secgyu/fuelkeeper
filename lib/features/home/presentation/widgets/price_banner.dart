@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -24,16 +24,16 @@ class PriceBanner extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: context.colors.bgSurface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.borderHair),
+        border: Border.all(color: context.colors.borderHair),
       ),
       child: Row(
         children: [
           Expanded(
             child: _BannerCell(label: '우리동네 평균', value: neighborhood),
           ),
-          Container(width: 1, height: 40, color: AppColors.borderHair),
+          Container(width: 1, height: 40, color: context.colors.borderHair),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: AppSpacing.base),
@@ -66,13 +66,13 @@ class _BannerCell extends StatelessWidget {
         Text(label, style: AppTypography.caption),
         const SizedBox(height: 2),
         if (value == null)
-          const SizedBox(
+          SizedBox(
             height: 22,
             width: 60,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.bgMuted,
-                borderRadius: BorderRadius.all(Radius.circular(6)),
+                color: context.colors.bgMuted,
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
               ),
             ),
           )
@@ -81,7 +81,7 @@ class _BannerCell extends StatelessWidget {
             amount: value!,
             size: 22,
             weight: FontWeight.w700,
-            color: muted ? AppColors.textSecondary : AppColors.textPrimary,
+            color: muted ? context.colors.textSecondary : context.colors.textPrimary,
           ),
       ],
     );

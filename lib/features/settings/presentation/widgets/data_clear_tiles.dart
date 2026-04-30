@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/features/favorites/application/favorites_providers.dart';
@@ -115,7 +115,7 @@ class _ClearButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.danger,
+        foregroundColor: context.colors.danger,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       ),
       child: const Text(

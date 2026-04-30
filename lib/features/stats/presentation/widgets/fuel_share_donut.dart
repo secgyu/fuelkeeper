@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/core/utils/formatters.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
@@ -27,7 +27,7 @@ class FuelShareDonut extends StatelessWidget {
           width: 120,
           height: 120,
           child: CustomPaint(
-            painter: _DonutPainter(shares: shares),
+            painter: _DonutPainter(shares: shares, tokens: context.colors),
           ),
         ),
         const SizedBox(width: 20),
@@ -38,8 +38,9 @@ class FuelShareDonut extends StatelessWidget {
 }
 
 class _DonutPainter extends CustomPainter {
-  _DonutPainter({required this.shares});
+  _DonutPainter({required this.shares, required this.tokens});
   final List<FuelTypeShare> shares;
+  final AppColorTokens tokens;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -48,7 +49,7 @@ class _DonutPainter extends CustomPainter {
     const stroke = 14.0;
 
     final bgPaint = Paint()
-      ..color = AppColors.bgMuted
+      ..color = tokens.bgMuted
       ..strokeWidth = stroke
       ..style = PaintingStyle.stroke;
     canvas.drawCircle(center, radius - stroke / 2, bgPaint);
@@ -61,7 +62,7 @@ class _DonutPainter extends CustomPainter {
       final sweep = s.ratio * 2 * math.pi - gap;
       if (sweep <= 0) continue;
       final paint = Paint()
-        ..color = _fuelColors[s.type] ?? AppColors.textPrimary
+        ..color = _fuelColors[s.type] ?? tokens.textPrimary
         ..strokeWidth = stroke
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
@@ -82,19 +83,19 @@ class _DonutPainter extends CustomPainter {
         children: [
           TextSpan(
             text: '$percent',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: tokens.textPrimary,
               letterSpacing: -0.8,
             ),
           ),
-          const TextSpan(
+          TextSpan(
             text: '%',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.textSecondary,
+              color: tokens.textSecondary,
             ),
           ),
         ],
@@ -129,7 +130,7 @@ class _Legend extends StatelessWidget {
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _fuelColors[s.type] ?? AppColors.textPrimary,
+                    color: _fuelColors[s.type] ?? context.colors.textPrimary,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -137,28 +138,28 @@ class _Legend extends StatelessWidget {
                 Expanded(
                   child: Text(
                     s.type.label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                 ),
                 Text(
                   '${(s.ratio * 100).toStringAsFixed(0)}%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '₩${Formatters.thousands(s.totalCost)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textTertiary,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ],

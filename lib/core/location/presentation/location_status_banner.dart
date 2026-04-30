@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_radius.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/app/theme/app_typography.dart';
@@ -42,16 +42,16 @@ class _Banner extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.10),
+        color: context.colors.warning.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.30)),
+        border: Border.all(color: context.colors.warning.withValues(alpha: 0.30)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.location_off_rounded,
-            color: AppColors.warning,
+            color: context.colors.warning,
             size: 20,
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -74,10 +74,10 @@ class _Banner extends StatelessWidget {
                     FilledButton.tonal(
                       onPressed: () => _runAction(spec.primaryAction),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.warning.withValues(
+                        backgroundColor: context.colors.warning.withValues(
                           alpha: 0.18,
                         ),
-                        foregroundColor: AppColors.warning,
+                        foregroundColor: context.colors.warning,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.md,
                           vertical: 8,
@@ -90,7 +90,7 @@ class _Banner extends StatelessWidget {
                     TextButton(
                       onPressed: () => ref.invalidate(locationResultProvider),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.textSecondary,
+                        foregroundColor: context.colors.textSecondary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.md,
                           vertical: 8,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 
 class Skeleton extends StatefulWidget {
   const Skeleton({
@@ -50,6 +50,8 @@ class _SkeletonState extends State<Skeleton>
       animation: _controller,
       builder: (_, _) {
         final t = _controller.value;
+        final base = context.colors.bgMuted;
+        final highlight = context.colors.bgSurface;
         return Container(
           width: widget.width,
           height: widget.height,
@@ -61,11 +63,7 @@ class _SkeletonState extends State<Skeleton>
             gradient: LinearGradient(
               begin: Alignment(-1.0 + 2.0 * t, 0),
               end: Alignment(1.0 + 2.0 * t, 0),
-              colors: const [
-                AppColors.bgMuted,
-                Color(0xFFF5F4EF),
-                AppColors.bgMuted,
-              ],
+              colors: [base, highlight, base],
               stops: const [0.0, 0.5, 1.0],
             ),
           ),

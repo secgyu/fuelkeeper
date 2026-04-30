@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fuelkeeper/app/theme/app_colors.dart';
+import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
 import 'package:fuelkeeper/app/theme/app_spacing.dart';
 
 class SectionBlock extends StatelessWidget {
@@ -17,10 +17,10 @@ class SectionBlock extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.sm),
           child: Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
         ),

@@ -5,6 +5,7 @@ import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/features/settings/presentation/widgets/data_clear_tiles.dart';
 import 'package:fuelkeeper/features/settings/presentation/widgets/fuel_type_setting_tile.dart';
 import 'package:fuelkeeper/features/settings/presentation/widgets/settings_primitives.dart';
+import 'package:fuelkeeper/features/settings/presentation/widgets/theme_mode_setting_tile.dart';
 import 'package:go_router/go_router.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -22,6 +23,8 @@ class SettingsPage extends ConsumerWidget {
           children: [
             const SettingsSectionHeader('기본 설정'),
             const FuelTypeSettingTile(),
+            const SettingsDivider(),
+            const ThemeModeSettingTile(),
             const SettingsDivider(),
             const LocationRefreshTile(),
             const SizedBox(height: AppSpacing.lg),

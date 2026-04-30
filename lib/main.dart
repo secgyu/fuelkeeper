@@ -9,6 +9,7 @@ import 'package:fuelkeeper/app/config/naver_map_config.dart';
 import 'package:fuelkeeper/app/config/opinet_config.dart';
 import 'package:fuelkeeper/app/router/app_router.dart';
 import 'package:fuelkeeper/app/theme/app_theme.dart';
+import 'package:fuelkeeper/app/theme/theme_mode_provider.dart';
 import 'package:fuelkeeper/core/lifecycle/app_lifecycle_observer.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_adapter.dart';
 import 'package:fuelkeeper/features/logs/data/fuel_log_repository.dart';
@@ -93,16 +94,33 @@ Future<void> _quarantineHiveBox(String name) async {
   }
 }
 
-class FuelKeeperApp extends StatelessWidget {
+class FuelKeeperApp extends ConsumerWidget {
   const FuelKeeperApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp.router(
       title: 'FuelKeeper',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: themeMode,
       routerConfig: appRouter,
+      builder: (context, child) {
+        // 시스템 텍스트 스케일이 너무 작거나 크면 레이아웃이 깨지는 화면이 있다.
+        // 0.9 ~ 1.3 구간으로 클램프해 가독성을 유지하면서도 사용자 설정을 일부 존중한다.
+        // 이 값은 향후 접근성 개선 시 1.5까지 상향을 검토할 수 있다.
+        final mq = MediaQuery.of(context);
+        final clamped = mq.textScaler.clamp(
+          minScaleFactor: 0.9,
+          maxScaleFactor: 1.3,
+        );
+        return MediaQuery(
+          data: mq.copyWith(textScaler: clamped),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }
