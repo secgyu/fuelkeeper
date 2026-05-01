@@ -24,9 +24,6 @@ class KakaoLocalRepository {
   static const String _searchEndpoint =
       'https://dapi.kakao.com/v2/local/search/keyword.json';
 
-  /// 키워드로 장소를 검색한다. (주유소·동·역 등 모두 가능)
-  ///
-  /// [center]가 지정되면 거리 기반 정렬, 없으면 정확도 정렬.
   Future<List<KakaoPlace>> searchPlaces(
     String query, {
     LatLng? center,
@@ -36,10 +33,7 @@ class KakaoLocalRepository {
     final trimmed = query.trim();
     if (trimmed.isEmpty) return const [];
     try {
-      final params = <String, dynamic>{
-        'query': trimmed,
-        'size': size,
-      };
+      final params = <String, dynamic>{'query': trimmed, 'size': size};
       if (center != null) {
         params['x'] = center.longitude;
         params['y'] = center.latitude;
@@ -64,6 +58,30 @@ class KakaoLocalRepository {
           .toList(growable: false);
     } catch (_) {
       return const [];
+    }
+  }
+
+  Future<String?> reverseRegionDepth1(LatLng location) async {
+    if (!KakaoConfig.isConfigured) return null;
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        _endpoint,
+        queryParameters: {'x': location.longitude, 'y': location.latitude},
+        options: Options(
+          headers: {'Authorization': 'KakaoAK ${KakaoConfig.restApiKey}'},
+        ),
+      );
+      final documents = response.data?['documents'];
+      if (documents is! List || documents.isEmpty) return null;
+      final preferred = documents.cast<Map<String, dynamic>>().firstWhere(
+        (e) => e['region_type'] == 'B',
+        orElse: () => documents.first as Map<String, dynamic>,
+      );
+      final r1 = (preferred['region_1depth_name'] as String?)?.trim();
+      if (r1 == null || r1.isEmpty) return null;
+      return r1;
+    } catch (_) {
+      return null;
     }
   }
 
@@ -105,7 +123,6 @@ class KakaoLocalRepository {
   }
 }
 
-/// Kakao Local 키워드 검색 결과 한 건.
 class KakaoPlace {
   const KakaoPlace({
     required this.id,
@@ -121,8 +138,6 @@ class KakaoPlace {
   final String address;
   final LatLng location;
   final String category;
-
-  /// API 호출 시 좌표를 함께 보낸 경우에만 채워진다. (미터)
   final int? distanceMeters;
 
   static KakaoPlace? fromJson(Map<String, dynamic> json) {

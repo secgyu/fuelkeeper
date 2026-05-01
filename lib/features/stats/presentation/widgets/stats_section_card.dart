@@ -9,14 +9,18 @@ class StatsSectionCard extends StatelessWidget {
     required this.title,
     required this.child,
     this.subtitle,
+    this.trailing,
   });
 
   final String title;
   final String? subtitle;
   final Widget child;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
+    final hasTrailing = trailing != null;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
@@ -28,19 +32,38 @@ class StatsSectionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textPrimary,
-                  letterSpacing: -0.3,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: context.colors.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    if (subtitle != null && hasTrailing) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: context.colors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              const Spacer(),
-              if (subtitle != null)
+              if (hasTrailing)
+                trailing!
+              else if (subtitle != null)
                 Text(
                   subtitle!,
                   style: TextStyle(
