@@ -10,8 +10,10 @@ import 'package:fuelkeeper/app/theme/app_spacing.dart';
 import 'package:fuelkeeper/core/location/location_providers.dart';
 import 'package:fuelkeeper/core/utils/coordinate_converter.dart';
 import 'package:fuelkeeper/features/home/application/home_providers.dart';
+import 'package:fuelkeeper/features/home/application/search_radius_provider.dart';
 import 'package:fuelkeeper/features/home/domain/fuel_type.dart';
 import 'package:fuelkeeper/features/home/domain/station.dart';
+import 'package:fuelkeeper/features/shell/application/tab_index_provider.dart';
 import 'package:fuelkeeper/features/map/presentation/widgets/empty_map_card.dart';
 import 'package:fuelkeeper/features/map/presentation/widgets/fuel_chip_button.dart';
 import 'package:fuelkeeper/features/map/presentation/widgets/fuel_picker_sheet.dart';
@@ -38,6 +40,13 @@ class _MapPageState extends ConsumerState<MapPage> {
   StreamSubscription<CompassEvent>? _compassSubscription;
   LatLng? _lastLocation;
   double _lastHeading = 0;
+  String? _lastDrawnSignature;
+
+  final Set<NClusterableMarker> _activeMarkers = {};
+
+  bool _drawing = false;
+  bool _pendingRedraw = false;
+  bool _pendingForce = false;
 
   @override
   void initState() {
@@ -75,15 +84,15 @@ class _MapPageState extends ConsumerState<MapPage> {
     );
 
     ref.listen<AsyncValue<List<Station>>>(stationsProvider, (prev, next) {
-      next.whenData((stations) async {
-        final controller = _controller;
-        if (controller == null) return;
-        await controller.clearOverlays();
-        await _addMarkers(controller, stations, fuelType);
-        locationAsync.whenData((loc) {
-          _updateMyLocationOverlay(controller, loc);
-        });
-      });
+      if (next is AsyncData<List<Station>>) {
+        _redrawMarkers(force: true);
+      }
+    });
+    ref.listen<FuelType>(selectedFuelTypeProvider, (_, _) {
+      _lastDrawnSignature = null;
+    });
+    ref.listen<int>(searchRadiusProvider, (_, _) {
+      _lastDrawnSignature = null;
     });
 
     ref.listen<AsyncValue<LatLng>>(currentLocationProvider, (prev, next) {
@@ -92,6 +101,14 @@ class _MapPageState extends ConsumerState<MapPage> {
         if (controller == null) return;
         _updateMyLocationOverlay(controller, loc);
       });
+    });
+
+    ref.listen<int>(selectedTabIndexProvider, (prev, next) {
+      if (next == ShellTabs.map && prev != ShellTabs.map) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _redrawMarkers(force: true);
+        });
+      }
     });
 
     final stations = stationsAsync.maybeWhen(
@@ -120,28 +137,28 @@ class _MapPageState extends ConsumerState<MapPage> {
               logoAlign: NLogoAlign.leftBottom,
               logoMargin: const EdgeInsets.only(left: 12, bottom: 24),
             ),
-            // 줌 13 이하(시·구 단위)에서는 인접한 주유소 마커들을 묶어 보여
-            // 도심에서의 마커 밀집을 완화한다. 줌 14 이상에서는 개별 가격 마커.
             clusterOptions: NaverMapClusteringOptions(
               enableZoomRange: const NInclusiveRange(0, 13),
               animationDuration: const Duration(milliseconds: 250),
               clusterMarkerBuilder: (info, marker) {
                 marker.setSize(const NSize(40, 40));
-                marker.setCaption(NOverlayCaption(
-                  text: info.size.toString(),
-                  textSize: 12,
-                  color: Colors.white,
-                  haloColor: context.colors.primary,
-                ));
+                marker.setCaption(
+                  NOverlayCaption(
+                    text: info.size.toString(),
+                    textSize: 12,
+                    color: Colors.white,
+                    haloColor: context.colors.primary,
+                  ),
+                );
               },
             ),
             onMapReady: (controller) async {
               _controller = controller;
               await _ensureMyLocationIcon();
               if (!mounted) return;
-              await _addMarkers(controller, stations, fuelType);
-              locationAsync.whenData((loc) {
-                _updateMyLocationOverlay(controller, loc);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                _redrawMarkers(force: true);
               });
             },
           ),
@@ -219,12 +236,49 @@ class _MapPageState extends ConsumerState<MapPage> {
     }
   }
 
-  Future<void> _addMarkers(
-    NaverMapController controller,
-    List<Station> stations,
-    FuelType fuelType,
-  ) async {
-    final markers = <NClusterableMarker>{};
+  Future<void> _redrawMarkers({bool force = false}) async {
+    if (_drawing) {
+      _pendingRedraw = true;
+      if (force) _pendingForce = true;
+      return;
+    }
+    _drawing = true;
+    try {
+      await _drawOnce(force: force);
+    } finally {
+      _drawing = false;
+    }
+    if (_pendingRedraw && mounted) {
+      _pendingRedraw = false;
+      final f = _pendingForce;
+      _pendingForce = false;
+      await Future<void>.microtask(() {});
+      if (mounted) await _redrawMarkers(force: f);
+    }
+  }
+
+  Future<void> _drawOnce({required bool force}) async {
+    final controller = _controller;
+    if (controller == null) return;
+
+    final stationsAsync = ref.read(stationsProvider);
+    final stations = stationsAsync.maybeWhen(
+      data: (s) => s,
+      orElse: () => const <Station>[],
+    );
+    final fuelType = ref.read(selectedFuelTypeProvider);
+    final radius = ref.read(searchRadiusProvider);
+
+    final signature = _signatureOf(stations, fuelType, radius);
+    if (!force && signature == _lastDrawnSignature) return;
+
+    final isFirstDraw = _lastDrawnSignature == null;
+    if (isFirstDraw && stations.isEmpty) {
+      return;
+    }
+    _lastDrawnSignature = signature;
+
+    final newMarkers = <NClusterableMarker>{};
     for (final s in stations) {
       final price = s.priceOf(fuelType);
       if (price == null) continue;
@@ -235,7 +289,7 @@ class _MapPageState extends ConsumerState<MapPage> {
             id: s.id,
             position: position,
             caption: NOverlayCaption(
-              text: '${(price / 1).round()}원',
+              text: '${price.round()}원',
               textSize: 11,
               color: Colors.white,
               haloColor: s.brand.color,
@@ -251,11 +305,32 @@ class _MapPageState extends ConsumerState<MapPage> {
             );
             return true;
           });
-      markers.add(marker);
+      newMarkers.add(marker);
     }
-    if (markers.isNotEmpty) {
-      await controller.addOverlayAll(markers);
+
+    final toDelete = List<NClusterableMarker>.from(_activeMarkers);
+    _activeMarkers.clear();
+    for (final m in toDelete) {
+      await controller.deleteOverlay(m.info);
     }
+
+    if (newMarkers.isNotEmpty) {
+      await controller.addOverlayAll(newMarkers);
+      _activeMarkers.addAll(newMarkers);
+    }
+
+    final loc = ref.read(currentLocationProvider).value;
+    if (loc != null) _updateMyLocationOverlay(controller, loc);
+  }
+
+  String _signatureOf(List<Station> stations, FuelType fuelType, int radius) {
+    var h = 0x811C9DC5;
+    for (final s in stations) {
+      h = (h ^ s.id.hashCode) * 0x01000193 & 0xFFFFFFFF;
+      final p = s.priceOf(fuelType) ?? 0;
+      h = (h ^ p.hashCode) * 0x01000193 & 0xFFFFFFFF;
+    }
+    return '${stations.length}|${fuelType.name}|$radius|$h';
   }
 
   void _updateMyLocationOverlay(

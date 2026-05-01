@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fuelkeeper/app/theme/app_color_tokens.dart';
+import 'package:fuelkeeper/features/shell/application/tab_index_provider.dart';
 import 'package:go_router/go_router.dart';
 
-class MainShell extends StatelessWidget {
+class MainShell extends ConsumerWidget {
   const MainShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -35,15 +37,22 @@ class MainShell extends StatelessWidget {
     ),
   ];
 
-  void _onTap(int index) {
+  void _onTap(WidgetRef ref, int index) {
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
     );
+
+    ref.read(selectedTabIndexProvider.notifier).set(index);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(selectedTabIndexProvider.notifier)
+          .set(navigationShell.currentIndex);
+    });
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
@@ -63,21 +72,25 @@ class MainShell extends StatelessWidget {
                 return TextStyle(
                   fontSize: 11,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? context.colors.primary : context.colors.textSecondary,
+                  color: selected
+                      ? context.colors.primary
+                      : context.colors.textSecondary,
                 );
               }),
               iconTheme: WidgetStateProperty.resolveWith((states) {
                 final selected = states.contains(WidgetState.selected);
                 return IconThemeData(
                   size: 24,
-                  color: selected ? context.colors.primary : context.colors.textSecondary,
+                  color: selected
+                      ? context.colors.primary
+                      : context.colors.textSecondary,
                 );
               }),
             ),
             child: NavigationBar(
               height: 64,
               selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: _onTap,
+              onDestinationSelected: (i) => _onTap(ref, i),
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               destinations: [
                 for (final item in _items)
