@@ -53,3 +53,7 @@ dart_defines.json
 
 # Personal notes
 todo.md
+.venv-tools/
+
+# 압축 전 원본 자산 백업(저장소에 올릴 필요 없음)
+tools/asset-originals/
