@@ -47,6 +47,8 @@ class StatsPage extends ConsumerWidget {
           StatsSectionCard(
             title: '시·도별 평균 가격',
             subtitle: _fuelLabel(fuelType),
+            collapsible: true,
+            sectionId: 'sido_averages',
             child: const SidoAveragesCard(),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -54,6 +56,8 @@ class StatsPage extends ConsumerWidget {
             title: '저가 주유소 TOP 10',
             subtitle: '${_fuelLabel(fuelType)} · 시·도 변경 가능',
             trailing: const SidoSelector(),
+            collapsible: true,
+            sectionId: 'low_top10',
             child: const LowTop10Card(),
           ),
 
@@ -108,18 +112,24 @@ class _MyStatsBody extends ConsumerWidget {
         StatsSectionCard(
           title: '월별 주유 비용',
           subtitle: '최근 6개월',
+          collapsible: true,
+          sectionId: 'monthly_cost',
           child: MonthlyCostChart(buckets: buckets),
         ),
         const SizedBox(height: AppSpacing.lg),
         StatsSectionCard(
           title: '연비 추이',
           subtitle: '월 평균 km/L',
+          collapsible: true,
+          sectionId: 'efficiency_trend',
           child: EfficiencyTrendChart(buckets: buckets),
         ),
         if (shares.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
           StatsSectionCard(
             title: '연료별 비용 분포',
+            collapsible: true,
+            sectionId: 'fuel_share',
             child: FuelShareDonut(shares: shares),
           ),
         ],
@@ -128,6 +138,8 @@ class _MyStatsBody extends ConsumerWidget {
           StatsSectionCard(
             title: '자주 가는 주유소',
             subtitle: 'TOP ${stations.length}',
+            collapsible: true,
+            sectionId: 'frequent_stations',
             child: Column(
               children: [
                 for (final s in stations) FrequentStationTile(station: s),
